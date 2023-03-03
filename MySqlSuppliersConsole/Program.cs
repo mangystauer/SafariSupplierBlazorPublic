@@ -33,7 +33,7 @@ internal class Program
         //CreateNewSupplier(serviceProvider.GetService<ICrud>());
         //UpdateSupplier(serviceProvider.GetService<ICrud>());
         //DeleteSupplier(serviceProvider.GetService<ICrud>(), 38);
-        
+        //new comment for git
 
 
         ReadAllSuppliers(serviceProvider.GetService<ICrud>());
