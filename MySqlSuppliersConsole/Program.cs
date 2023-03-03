@@ -3,22 +3,41 @@ using DataAccessLibrary.Models;
 using Microsoft.Extensions.Configuration;
 using Org.BouncyCastle.Security;
 using System.IO;
+using Microsoft.Extensions.DependencyInjection;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
 
-        MySqlCrud sql = new MySqlCrud(GetConnectionString());
+        var builder = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory()) //<--You would need to set the path
+        .AddJsonFile("appsettings.json"); //or what ever file you have the settings
+
+        IConfiguration configuration = builder.Build();
+
+
+
+        var serviceProvider = new ServiceCollection()
+            .AddTransient<IDataAccess, MySQLDataAccess>()
+            .AddTransient<ICrud, MySqlCrud>()
+            .AddSingleton<IConfiguration>(configuration)
+            .BuildServiceProvider();
+            
+        
+        //MySqlCrud sql = new MySqlCrud();
 
         //ReadAllSuppliers(sql);
-        //ReadSupplier(sql, 28);
+        //ReadSupplier(serviceProvider.GetService<ICrud>(), 28);
 
-        CreateNewSupplier(sql);
-        //UpdateSupplier(sql);
-        //DeleteSupplier(sql, 35);
-        //ReadSupplier(sql, newSupplier);
-        ReadAllSuppliers(sql);
+        //CreateNewSupplier(serviceProvider.GetService<ICrud>());
+        //UpdateSupplier(serviceProvider.GetService<ICrud>());
+        //DeleteSupplier(serviceProvider.GetService<ICrud>(), 38);
+        
+
+
+        ReadAllSuppliers(serviceProvider.GetService<ICrud>());
+
 
         Console.WriteLine("Done Processing MySQL");
 
@@ -44,7 +63,7 @@ internal class Program
     }
 
 
-    private static void ReadAllSuppliers(MySqlCrud sql)
+    private static void ReadAllSuppliers(ICrud sql)
     {
         var rows = sql.GetAllSuppliers();
 
@@ -54,14 +73,14 @@ internal class Program
         }
     }
 
-    private static void ReadSupplier(MySqlCrud sql, int supplierId)
+    private static void ReadSupplier(ICrud sql, int supplierId)
     {
         Supplier row = sql.GetSupplier(supplierId);
 
         Console.WriteLine($"{row.id}: {row.prefix} {row.supplier} {row.desc_manual}");
     }
 
-    private static void CreateNewSupplier(MySqlCrud sql)
+    private static void CreateNewSupplier(ICrud sql)
     {
         Supplier supplier = new Supplier
         {
@@ -83,11 +102,11 @@ internal class Program
 
     }
 
-    private static void UpdateSupplier(MySqlCrud sql)
+    private static void UpdateSupplier(ICrud sql)
     {
         Supplier supplier = new Supplier
         {
-            id = 36,
+            id = 38,
             supplier = "Test Sup4",
             prefix = "TT3",
             partnum_col = 1,
@@ -100,7 +119,7 @@ internal class Program
         sql.UpdateSupplier(supplier);
     }
 
-    private static void DeleteSupplier(MySqlCrud sql, int supplierId)
+    private static void DeleteSupplier(ICrud sql, int supplierId)
     {
         sql.RemoveSupplier(supplierId);
 

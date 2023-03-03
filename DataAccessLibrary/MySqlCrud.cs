@@ -10,20 +10,22 @@ namespace DataAccessLibrary
 {
     public class MySqlCrud : ICrud
     {
-        private readonly string _connectionString;
 
-        private MySQLDataAccess db = new MySQLDataAccess();
+        private readonly IDataAccess _db;
 
-        public MySqlCrud(string connectionString)
+        private const string connectionStringName = "Default";
+
+
+        public MySqlCrud(IDataAccess db)
         {
-            _connectionString = connectionString;
+            _db = db;
         }
 
         public List<Supplier> GetAllSuppliers()
         {
             string sql = "select * from suppliers";
 
-            return db.LoadData<Supplier, dynamic>(sql, new { }, _connectionString);
+            return _db.LoadData<Supplier, dynamic>(sql, new { }, connectionStringName);
         }
 
         public Supplier GetSupplier(int supplierId)
@@ -31,7 +33,7 @@ namespace DataAccessLibrary
             string sql = "select * from suppliers where id = @Id";
             Supplier output = new Supplier();
 
-            output = db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, _connectionString).FirstOrDefault();
+            output = _db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, connectionStringName).FirstOrDefault();
 
             if (output.supplier == null)
             {
@@ -50,9 +52,9 @@ namespace DataAccessLibrary
             string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
 
 
-            db.SaveData(sql,
+            _db.SaveData(sql,
                         new { supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove },
-                        _connectionString);
+                        connectionStringName);
 
 
             // Get the ID number of the supplier
@@ -76,47 +78,49 @@ namespace DataAccessLibrary
                 " markupthreshold = @markupthreshold," +
                 " markupbelow = @markupbelow," +
                 " markupabove = @markupabove," +
-                " p_time = @p_time" +
-                " massUpload = @massUpload" +
-                " hasnobrand = @hasnobrand" +
-                " brand = @brand" +
-                " brand_col = @brand_col" +
+                " p_time = @p_time," +
+                " massUpload = @massUpload," +
+                " hasnobrand = @hasnobrand," +
+                " brand = @brand," +
+                " brand_col = @brand_col," +
                 " partnum_col = @partnum_col" +
-                " manual_description = @manual_description" +
-                " descr = @descr" +
-                " desc_manual = @desc_manual" +
-                " hasnoqty = @hasnoqty" +
-                " qty = @qty" +
-                " hasnomodels = @hasnomodels" +
-                " models = @models" +
-                " p_altnum1 = @p_altnum1" +
-                " avail1 = @avail1" +
-                " avail2 = @avail2" +
-                " avail3 = @avail3" +
-                " avail4 = @avail4" +
-                " avail5 = @avail5" +
-                " avail6 = @avail6" +
-                " avail2t = @avail2t" +
-                " avail3t = @avail3t" +
-                " avail4t = @avail4t" +
-                " avail5t = @avail5t" +
-                " avail6t = @avail6t" +
-                " not_round_to_200 = @not_round_to_200" +
-                " cross1t = @cross1t" +
-                " cross2t = @cross2t" +
-                " cross3t = @cross3t" +
-                " cross4t = @cross4t" +
-                " cross5t = @cross5t" +
-                " cross6t = @cross6t" +
-                " cross1col = @cross1col" +
-                " cross2col = @cross2col" +
-                " cross3col = @cross3col" +
-                " cross4col = @cross4col" +
-                " cross5col = @cross5col" +
+                "," +
+                // Uncomment when Razor is wired up and all the fields are populated
+                " manual_description = @manual_description," +
+                " descr = @descr," +
+                " desc_manual = @desc_manual," +
+                " hasnoqty = @hasnoqty," +
+                " qty = @qty," +
+                " hasnomodels = @hasnomodels," +
+                " models = @models," +
+                " p_altnum1 = @p_altnum1," +
+                " avail1 = @avail1," +
+                " avail2 = @avail2," +
+                " avail3 = @avail3," +
+                " avail4 = @avail4," +
+                " avail5 = @avail5," +
+                " avail6 = @avail6," +
+                " avail2t = @avail2t," +
+                " avail3t = @avail3t," +
+                " avail4t = @avail4t," +
+                " avail5t = @avail5t," +
+                " avail6t = @avail6t," +
+                " not_round_to_200 = @not_round_to_200," +
+                " cross1t = @cross1t," +
+                " cross2t = @cross2t," +
+                " cross3t = @cross3t," +
+                " cross4t = @cross4t," +
+                " cross5t = @cross5t," +
+                " cross6t = @cross6t," +
+                " cross1col = @cross1col," +
+                " cross2col = @cross2col," +
+                " cross3col = @cross3col," +
+                " cross4col = @cross4col," +
+                " cross5col = @cross5col," +
                 " cross6col = @cross6col" +
                 " where id = @id";
             //            db.SaveData(sql, new {supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove, supplier.id }, _connectionString);
-            db.SaveData(sql, supplier, _connectionString);
+            _db.SaveData(sql, supplier, connectionStringName);
 
         }
 
@@ -124,7 +128,7 @@ namespace DataAccessLibrary
         {
 
             string sql = "delete from suppliers where id = @id";
-            db.SaveData(sql, new { id = supplierId }, _connectionString);
+            _db.SaveData(sql, new { id = supplierId }, connectionStringName);
 
         }
 
