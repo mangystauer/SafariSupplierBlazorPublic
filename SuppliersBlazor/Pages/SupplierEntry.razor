@@ -1,0 +1,40 @@
+﻿@page "/suppliers"
+
+<h3>Supplier Entry</h3>
+
+<EditForm Model="model" OnValidSubmit="ValidSubmit">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <ValidationSummary></ValidationSummary>
+    
+
+    <InputText @bind-Value="model.supplier" placeholder="Название поставщика" class="form-control"></InputText>
+    <InputText @bind-Value="model.prefix" placeholder="Префикс" class="form-control"></InputText>
+    
+    <button class="btn btn-primary" type="submit">Submit</button>
+
+</EditForm>
+
+<h3>List of Suppliers</h3>
+
+<ul>
+    @foreach (var p in suppliers)
+    {
+        <li>@p.supplier and @p.prefix</li>
+    }
+
+</ul>
+
+
+
+@code {
+    SupplierModel model = new SupplierModel();
+    List<SupplierModel> suppliers = new();
+
+
+    private void ValidSubmit()
+    {
+        suppliers.Add(model);
+        model = new();
+    }
+
+}

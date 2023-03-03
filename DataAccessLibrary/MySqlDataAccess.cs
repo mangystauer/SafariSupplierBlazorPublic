@@ -9,7 +9,7 @@ using Dapper;
 
 namespace DataAccessLibrary
 {
-    public class MySQLDataAccess
+    public class MySQLDataAccess : IDataAccess
     {
         public List<T> LoadData<T, U>(string sqlStatement, U parameters, string connectionString)
         {

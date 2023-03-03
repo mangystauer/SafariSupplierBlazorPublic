@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DataAccessLibrary
 {
-    public class MySqlCrud
+    public class MySqlCrud : ICrud
     {
         private readonly string _connectionString;
 
@@ -50,9 +50,9 @@ namespace DataAccessLibrary
             string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
 
 
-                db.SaveData(sql,
-                            new { supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove },
-                            _connectionString);
+            db.SaveData(sql,
+                        new { supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove },
+                        _connectionString);
 
 
             // Get the ID number of the supplier
@@ -115,14 +115,14 @@ namespace DataAccessLibrary
                 " cross5col = @cross5col" +
                 " cross6col = @cross6col" +
                 " where id = @id";
-//            db.SaveData(sql, new {supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove, supplier.id }, _connectionString);
+            //            db.SaveData(sql, new {supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove, supplier.id }, _connectionString);
             db.SaveData(sql, supplier, _connectionString);
 
         }
 
         public void RemoveSupplier(int supplierId)
         {
-            
+
             string sql = "delete from suppliers where id = @id";
             db.SaveData(sql, new { id = supplierId }, _connectionString);
 

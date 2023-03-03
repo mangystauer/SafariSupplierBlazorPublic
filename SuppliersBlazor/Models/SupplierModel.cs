@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccessLibrary.Models
+namespace SuppliersBlazor.Models
 {
-    public class Supplier
+    public class SupplierModel
     {
         
         [Key]

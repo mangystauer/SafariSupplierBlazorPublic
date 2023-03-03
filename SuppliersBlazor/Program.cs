@@ -1,3 +1,4 @@
+using DataAccessLibrary;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using SuppliersBlazor.Data;
@@ -8,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddTransient<IDataAccess, MySQLDataAccess>();
+builder.Services.AddTransient<ICrud, MySqlCrud>();
 
 var app = builder.Build();
 
