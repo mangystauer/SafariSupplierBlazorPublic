@@ -21,12 +21,6 @@ namespace DataAccessLibrary
             _db = db;
         }
 
-        public List<Supplier> GetAllSuppliers()
-        {
-            string sql = "select * from suppliers";
-
-            return _db.LoadData<Supplier, dynamic>(sql, new { }, connectionStringName);
-        }
 
         public Task<List<Supplier>> GetAllSuppliersAsync()
         {
@@ -36,7 +30,7 @@ namespace DataAccessLibrary
         }
 
 
-        public Supplier GetSupplier(int supplierId)
+        public Task<Supplier> GetSupplierAsync(int supplierId)
         {
             string sql = "select * from suppliers where id = @Id";
             Supplier output = new Supplier();
@@ -48,13 +42,14 @@ namespace DataAccessLibrary
                 // do something to tell the user that the record was not found
                 return null;
             }
-            return output;
-
-
+            return Task.FromResult(output);
         }
 
 
-        public void CreateSupplier(Supplier supplier)
+
+
+
+        public async Task CreateSupplierAsync(Supplier supplier)
         {
             // Save the supplier
             string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
@@ -73,8 +68,9 @@ namespace DataAccessLibrary
             //    new { supplier.supplier, supplier.prefix },
             //    _connectionString).First().Id;
 
-
+            
         }
+
 
         public void UpdateSupplier(Supplier supplier)
         {

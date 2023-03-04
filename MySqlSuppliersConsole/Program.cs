@@ -30,7 +30,7 @@ internal class Program
         //ReadAllSuppliers(sql);
         //ReadSupplier(serviceProvider.GetService<ICrud>(), 28);
 
-        //CreateNewSupplier(serviceProvider.GetService<ICrud>());
+        CreateNewSupplier(serviceProvider.GetService<ICrud>());
         //UpdateSupplier(serviceProvider.GetService<ICrud>());
         //DeleteSupplier(serviceProvider.GetService<ICrud>(), 38);
         //new comment for git
@@ -63,9 +63,9 @@ internal class Program
     }
 
 
-    private static void ReadAllSuppliers(ICrud sql)
+    private static async void ReadAllSuppliers(ICrud sql)
     {
-        var rows = sql.GetAllSuppliers();
+        var rows = await sql.GetAllSuppliersAsync();
 
         foreach (var row in rows)
         {
@@ -73,20 +73,20 @@ internal class Program
         }
     }
 
-    private static void ReadSupplier(ICrud sql, int supplierId)
+    private static async void ReadSupplier(ICrud sql, int supplierId)
     {
-        Supplier row = sql.GetSupplier(supplierId);
+        Supplier row = await sql.GetSupplierAsync(supplierId);
 
         Console.WriteLine($"{row.id}: {row.prefix} {row.supplier} {row.desc_manual}");
     }
 
-    private static void CreateNewSupplier(ICrud sql)
+    private async static void CreateNewSupplier(ICrud sql)
     {
         Supplier supplier = new Supplier
         {
             //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@id, @supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
 
-            supplier = "Test Sup2",
+            supplier = "Test Sup5",
             prefix ="TT2",
             partnum_col = 1,
             avail = 2,
@@ -97,7 +97,7 @@ internal class Program
 
         };
 
-        sql.CreateSupplier(supplier);
+        await sql.CreateSupplierAsync(supplier);
 
 
     }

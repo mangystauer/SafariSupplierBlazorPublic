@@ -4,10 +4,9 @@ namespace DataAccessLibrary
 {
     public interface ICrud
     {
-        void CreateSupplier(Supplier supplier);
-        List<Supplier> GetAllSuppliers();
+        Task CreateSupplierAsync(Supplier supplier);
         Task<List<Supplier>> GetAllSuppliersAsync();
-        Supplier GetSupplier(int supplierId);
+        Task<Supplier> GetSupplierAsync(int supplierId);
         void RemoveSupplier(int supplierId);
         void UpdateSupplier(Supplier supplier);
     }
