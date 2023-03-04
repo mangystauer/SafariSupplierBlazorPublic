@@ -1,15 +1,58 @@
-﻿@page "/suppliers"
+﻿@page "/supplierentry"
+@using DataAccessLibrary;
 
-<h3>Supplier Entry</h3>
+
+<h3>Ввод поставщика</h3>
 
 <EditForm Model="model" OnValidSubmit="ValidSubmit">
     <DataAnnotationsValidator></DataAnnotationsValidator>
     <ValidationSummary></ValidationSummary>
     
+@*    <div class="form-group row">
+    <label for="supplier" class="form-label">Название поставщика (@nameof(model.supplier)):</label>
+        <div class="col-sm-10">
+    <InputText id="supplier" class="form-control" placeholder="Supplier" @bind-Value="@model.supplier" />
+            <ValidationMessage For="@(() => model.supplier)" />
 
-    <InputText @bind-Value="model.supplier" placeholder="Название поставщика" class="form-control"></InputText>
-    <InputText @bind-Value="model.prefix" placeholder="Префикс" class="form-control"></InputText>
+        </div>
+    </div>*@
     
+
+    @*<InputText @bind-Value="model.supplier" placeholder="Название поставщика" class="form-control"></InputText>*@
+    
+@*    <InputText @bind-Value="model.prefix" placeholder="Префикс" class="form-control"></InputText>
+*@
+
+
+    <div class="form-group row">
+        <label for="supplier" class="col-sm-4 col-form-label">Поставщик (@nameof(model.supplier))</label>
+        <div class="col-sm-4">
+            <InputText class="form-control" id="supplier" @bind-Value="model.supplier" placeholder="Supplier" />
+            <ValidationMessage For="@(() => model.supplier)" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="prefix" class="col-sm-4 col-form-label">Префикс (@nameof(model.prefix)</label>
+        <div class="col-sm-4">
+            <InputText class="form-control" id="prefix" @bind-Value="model.prefix" placeholder="Prefix" />
+            <ValidationMessage For="@(() => model.prefix)" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="p_time" class="col-sm-4 col-form-label">Время доставки до клиента в днях (например 2-5) (@nameof(model.p_time))</label>
+        <div class="col-sm-4">
+            <InputText class="form-control" id="p_time" @bind-Value="model.p_time" placeholder="Processing Time" />
+            <ValidationMessage For="@(() => model.p_time)" />
+        </div>
+    </div>
+
+            
+
+
+
+
+
+
     <button class="btn btn-primary" type="submit">Submit</button>
 
 </EditForm>
