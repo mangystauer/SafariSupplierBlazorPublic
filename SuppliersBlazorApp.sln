@@ -5,9 +5,9 @@ VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuppliersBlazor", "SuppliersBlazor\SuppliersBlazor.csproj", "{F42F1FDD-28D6-44A4-82E8-40A05CFC6264}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccessLibrary", "DataAccessLibrary\DataAccessLibrary.csproj", "{83088D8A-E88A-41C4-B0D0-4FE6AFA068C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccessLibrary", "DataAccessLibrary\DataAccessLibrary.csproj", "{83088D8A-E88A-41C4-B0D0-4FE6AFA068C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySqlSuppliersConsole", "MySqlSuppliersConsole\MySqlSuppliersConsole.csproj", "{BCEF28F0-8601-481F-BA5B-9E40F2336F6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MySqlSuppliersConsole", "MySqlSuppliersConsole\MySqlSuppliersConsole.csproj", "{BCEF28F0-8601-481F-BA5B-9E40F2336F6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
