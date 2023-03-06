@@ -3,7 +3,26 @@
 @inject ICrud sql
 
 
-<h3>Ввод поставщика</h3>
+<h3>Настройки поставщика</h3>
+
+
+<div class="text-body col-sm-12">
+    Настройки импорта файла поставщика задаются через параметры ниже. 
+    <br />Они включают номера колонок из файла, их использование, ручное назначение.
+    <br />
+    Примеры ручного назначения:
+    <br />
+    Пример 1 - одна фирма производитель в файле (Gerat), поэтому его явно не указывают в какой-то из колонок.
+    <br />
+    Пример 2 - одинаковое описание товаров, когда в файле только диски - пишем тормозные диски.
+    <br />
+    <b>!!!Важно!!!</b>
+    <br />
+    Поле разрешить массовую загрузку должно быть включено, иначе поставщик не будет доступен для импорта файлов.
+    <br />
+    Включать его надо после того, как введены все настройки.
+
+</div>
 
 <EditForm Model="model" OnValidSubmit="ValidSubmit">
     <DataAnnotationsValidator></DataAnnotationsValidator>
@@ -29,8 +48,8 @@
     {
         <div id="safari_entry_form" class="form-container">
             <div class="form-group row">
-                <label for="supplier" class="col-sm-2 col-form-label">Поставщик</label>
-                <div class="col-sm-1 offset-sm-2">
+                <label for="supplier" class="col-sm-2 col-form-label font-weight-bold" style="font-size: larger;" >Поставщик</label>
+                <div class="col-sm-2">
                     <InputText class="form-control" id="supplier" @bind-Value="model.supplier" placeholder="Supplier" />
                     <ValidationMessage For="@(() => model.supplier)" />
                 </div>
@@ -39,7 +58,7 @@
                     <InputText class="form-control" id="prefix" @bind-Value="model.prefix" placeholder="Prefix" />
                     <ValidationMessage For="@(() => model.prefix)" />
                 </div>
-                <label for="p_time" class="col-sm-2 col-form-label">Время доставки до клиента, дней (например 2-5) </label>
+                <label for="p_time" class="col-sm-2 col-form-label offset-sm-1">Время доставки до клиента, дней (например 2-5) </label>
                 <div class="col-sm-1">
                     <InputText class="form-control" id="p_time" @bind-Value="model.p_time" placeholder="Processing Time" />
                     <ValidationMessage For="@(() => model.p_time)" />
@@ -109,7 +128,7 @@
             </div>
             <div class="form-group row">
                 <label for="hasnoqty" class="col-sm-4 col-form-label">Нет колонки партии (шт в упаковке)</label>
-                <div class="col-sm-2">
+                <div class="col-sm-2 margin-left:2em; ">
                     <InputCheckbox class="form-check-input" id="hasnoqty" @bind-Value="model.hasnoqty" />
                     <ValidationMessage For="@(() => model.hasnoqty)" />
                 </div>
@@ -157,77 +176,79 @@
             </div>
 
             <div class="form-group row">
-                <label for="avail2" class="col-sm-4 col-form-label">Колонка наличия на складе 2 (@nameof(model.avail2))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="avail2" @bind-Value="model.avail2" />
+                <label for="avail2t" class="col-sm-2 col-form-label">Использовать наличие на складе 2  (@nameof(model.avail2t))</label>
+                <div class="col-sm-2 offset-sm-2">
+                    <InputCheckbox class="form-check-input" id="avail2t" @bind-Value="model.avail2t" />
+                    <ValidationMessage For="@(() => model.avail2t)" />
+                </div>
+                <label for="avail2" class="col-sm-2 col-form-label">Колонка наличия на складе 2 (@nameof(model.avail2))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="avail2" @bind-Value="model.avail2" disabled="@(!model.avail2t)" />
                     <ValidationMessage For="@(() => model.avail2)" />
                 </div>
+
             </div>
 
             <div class="form-group row">
-                <label for="avail3" class="col-sm-4 col-form-label">Колонка наличия на складе 3 (@nameof(model.avail3))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="avail3" @bind-Value="model.avail3" />
+                
+                
+                <label for="avail3t" class="col-sm-2 col-form-label">Использовать наличие на складе 3  (@nameof(model.avail3t))</label>
+                <div class="col-sm-2 offset-sm-2">
+                    <InputCheckbox class="form-check-input" id="avail3t" @bind-Value="model.avail3t" />
+                    <ValidationMessage For="@(() => model.avail3t)" />
+                </div>
+
+                <label for="avail3" class="col-sm-2 col-form-label">Колонка наличия на складе 3 (@nameof(model.avail3))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="avail3" @bind-Value="model.avail3" disabled="@(!model.avail3t)" />
                     <ValidationMessage For="@(() => model.avail3)" />
                 </div>
             </div>
             <div class="form-group row">
-                <label for="avail4" class="col-sm-4 col-form-label">Колонка наличия на складе 4 (@nameof(model.avail4))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="avail4" @bind-Value="model.avail4" />
+
+                <label for="avail4t" class="col-sm-2 col-form-label">Использовать наличие на складе 4 (@nameof(model.avail4t))</label>
+                <div class="col-sm-2 offset-sm-2">
+                    <InputCheckbox class="form-check-input" id="avail4t" @bind-Value="model.avail4t" />
+                    <ValidationMessage For="@(() => model.avail4t)" />
+                </div>
+
+                <label for="avail4" class="col-sm-2 col-form-label">Колонка наличия на складе 4 (@nameof(model.avail4))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="avail4" @bind-Value="model.avail4" disabled="@(!model.avail4t)" />
                     <ValidationMessage For="@(() => model.avail4)" />
                 </div>
             </div>
             <div class="form-group row">
-                <label for="avail5" class="col-sm-4 col-form-label">Колонка наличия на складе 5 (@nameof(model.avail5))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="avail5" @bind-Value="model.avail5" />
-                    <ValidationMessage For="@(() => model.avail5)" />
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="avail6" class="col-sm-4 col-form-label">Колонка наличия на складе 6 (@nameof(model.avail6))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="avail6" @bind-Value="model.avail6" />
-                    <ValidationMessage For="@(() => model.avail6)" />
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="avail2t" class="col-sm-4 col-form-label">Использовать наличие на складе 2  (@nameof(model.avail2t))</label>
-                <div class="col-sm-4">
-                    <InputCheckbox class="form-check-input" id="avail2t" @bind-Value="model.avail2t" />
-                    <ValidationMessage For="@(() => model.avail2t)" />
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="avail3t" class="col-sm-4 col-form-label">Использовать наличие на складе 3  (@nameof(model.avail3t))</label>
-                <div class="col-sm-4">
-                    <InputCheckbox class="form-check-input" id="avail3t" @bind-Value="model.avail3t" />
-                    <ValidationMessage For="@(() => model.avail3t)" />
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="avail4t" class="col-sm-4 col-form-label">Использовать наличие на складе 4 (@nameof(model.avail4t))</label>
-                <div class="col-sm-4">
-                    <InputCheckbox class="form-check-input" id="avail4t" @bind-Value="model.avail4t" />
-                    <ValidationMessage For="@(() => model.avail4t)" />
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label for="avail5t" class="col-sm-4 col-form-label">Использовать наличие на складе 5 (@nameof(model.avail5t))</label>
-                <div class="col-sm-4">
+                <label for="avail5t" class="col-sm-2 col-form-label">Использовать наличие на складе 5 (@nameof(model.avail5t))</label>
+                <div class="col-sm-2 offset-sm-2">
                     <InputCheckbox class="form-check-input" id="avail5t" @bind-Value="model.avail5t" />
                     <ValidationMessage For="@(() => model.avail5t)" />
                 </div>
+                
+                
+                <label for="avail5" class="col-sm-2 col-form-label">Колонка наличия на складе 5 (@nameof(model.avail5))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="avail5" @bind-Value="model.avail5" disabled="@(!model.avail5t)" />
+                    <ValidationMessage For="@(() => model.avail5)" />
+                </div>
             </div>
+
+
             <div class="form-group row">
-                <label for="avail6t" class="col-sm-4 col-form-label">Использовать наличие на складе 6  (@nameof(model.avail6t))</label>
-                <div class="col-sm-4">
+                <label for="avail6t" class="col-sm-2 col-form-label">Использовать наличие на складе 6  (@nameof(model.avail6t))</label>
+                <div class="col-sm-2 offset-sm-2">
                     <InputCheckbox class="form-check-input" id="avail6t" @bind-Value="model.avail6t" />
                     <ValidationMessage For="@(() => model.avail6t)" />
                 </div>
+                
+                <label for="avail6" class="col-sm-2 col-form-label">Колонка наличия на складе 6 (@nameof(model.avail6))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="avail6" @bind-Value="model.avail6" disabled="@(!model.avail6t)" />
+                    <ValidationMessage For="@(() => model.avail6)" />
+                </div>
             </div>
+
+
             <div class="form-group row">
                 <label for="not_round_to_200" class="col-sm-4 col-form-label">Не округлять до 200 тг (@nameof(model.not_round_to_200))</label>
                 <div class="col-sm-4">
@@ -236,106 +257,98 @@
                 </div>
             </div>
             <div class="form-group row">
-                <label for="markupthreshold" class="col-sm-4 col-form-label">Порог стоимости для наценки (@nameof(model.markupthreshold))</label>
-                <div class="col-sm-4">
+                <label for="markupthreshold" class="col-sm-4 col-form-label">Порог стоимости для наценки, тг</label>
+                <div class="col-sm-1">
                     <InputNumber class="form-control" id="markupthreshold" @bind-Value="model.markupthreshold" step="1" />
                     <ValidationMessage For="@(() => model.markupthreshold)" />
                 </div>
-            </div>
-            <div class="form-group row">
-                <label for="markupbelow" class="col-sm-4 col-form-label">Наценка до порога стоимости (напр 30% как 0.3) (@nameof(model.markupbelow))</label>
-                <div class="col-sm-4">
+                <label for="markupbelow" class="col-sm-2 col-form-label offset-sm-1">Наценка до порога стоимости (напр 30% как 0,3)</label>
+                <div class="col-sm-1">
                     <InputNumber class="form-control" id="markupbelow" @bind-Value="model.markupbelow" step="0.01" />
                     <ValidationMessage For="@(() => model.markupbelow)" />
                 </div>
-            </div>
-            <div class="form-group row">
-                <label for="markupabove" class="col-sm-4 col-form-label">Наценка выше порога стоимости (напр 25% как 0.25) (@nameof(model.markupabove))</label>
-                <div class="col-sm-4">
+                <label for="markupabove" class="col-sm-2 col-form-label">Наценка выше порога стоимости (напр 25% как 0,25)</label>
+                <div class="col-sm-1">
                     <InputNumber class="form-control" id="markupabove" @bind-Value="model.markupabove" step="0.01" />
                     <ValidationMessage For="@(() => model.markupabove)" />
                 </div>
             </div>
+            
 
             <div class="form-group row">
                 <label for="cross1t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 1 (@nameof(model.cross1t))</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <InputCheckbox class="form-check-input" id="cross1t" @bind-Value="model.cross1t" />
                 </div>
+                <label for="cross1col" class="col-sm-2 col-form-label">Кросс номера колонка 1 (@nameof(model.cross1col))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="cross1col" @bind-Value="model.cross1col" disabled="@(!model.cross1t)" />
+                </div>
             </div>
+
             <div class="form-group row">
                 <label for="cross2t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 2 (@nameof(model.cross2t))</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <InputCheckbox class="form-check-input" id="cross2t" @bind-Value="model.cross2t" />
                 </div>
+
+                <label for="cross2col" class="col-sm-2 col-form-label">Кросс номера колонка 2 (@nameof(model.cross2col))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="cross2col" @bind-Value="model.cross2col" disabled="@(!model.cross2t)" />
+                </div>
             </div>
+
+
             <div class="form-group row">
                 <label for="cross3t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 3 (@nameof(model.cross3t))</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <InputCheckbox class="form-check-input" id="cross3t" @bind-Value="model.cross3t" />
                 </div>
+                <label for="cross3col" class="col-sm-2 col-form-label">Кросс номера колонка 3 (@nameof(model.cross4col))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross4col" disabled="@(!model.cross3t)" />
+                    <ValidationMessage For="@(() => model.cross4col)" />
+                </div>
             </div>
+
+
             <div class="form-group row">
                 <label for="cross4t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 4 (@nameof(model.cross4t))</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <InputCheckbox class="form-check-input" id="cross4t" @bind-Value="model.cross4t" />
                 </div>
+                <label for="cross4col" class="col-sm-2 col-form-label">Кросс номера колонка 4 (@nameof(model.cross4col))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross4col" disabled="@(!model.cross4t)" />
+                    <ValidationMessage For="@(() => model.cross4col)" />
+                </div>
             </div>
+
+
             <div class="form-group row">
                 <label for="cross5t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 5 (@nameof(model.cross5t))</label>
-                <div class="col-sm-4">
+                <div class="col-sm-2">
                     <InputCheckbox class="form-check-input" id="cross5t" @bind-Value="model.cross5t" />
                 </div>
-            </div>
-            <div class="form-group row">
-                <label for="cross6t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 6 (@nameof(model.cross6t))</label>
-                <div class="col-sm-4">
-                    <InputCheckbox class="form-check-input" id="cross6t" @bind-Value="model.cross6t" />
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="cross1col" class="col-sm-4 col-form-label">Кросс номера колонка 1 (@nameof(model.cross1col))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="cross1col" @bind-Value="model.cross1col" />
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="cross2col" class="col-sm-4 col-form-label">Кросс номера колонка 2 (@nameof(model.cross2col))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="cross2col" @bind-Value="model.cross2col" />
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label for="cross3col" class="col-sm-4 col-form-label">Кросс номера колонка 3 (@nameof(model.cross4col))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross4col" />
-                    <ValidationMessage For="@(() => model.cross4col)" />
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label for="cross4col" class="col-sm-4 col-form-label">Кросс номера колонка 4 (@nameof(model.cross4col))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross4col" />
-                    <ValidationMessage For="@(() => model.cross4col)" />
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label for="cross5col" class="col-sm-4 col-form-label">Кросс номера колонка 5 (@nameof(model.cross5col))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="cross5col" @bind-Value="model.cross5col" />
+                <label for="cross5col" class="col-sm-2 col-form-label">Кросс номера колонка 5 (@nameof(model.cross5col))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="cross5col" @bind-Value="model.cross5col" disabled="@(!model.cross5t)" />
                     <ValidationMessage For="@(() => model.cross5col)" />
                 </div>
             </div>
 
+
             <div class="form-group row">
-                <label for="cross6col" class="col-sm-4 col-form-label">Кросс номера колонка 6 (@nameof(model.cross6col))</label>
-                <div class="col-sm-4">
-                    <InputNumber class="form-control" id="cross6col" @bind-Value="model.cross6col" />
+                <label for="cross6t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 6 (@nameof(model.cross6t))</label>
+                <div class="col-sm-2">
+                    <InputCheckbox class="form-check-input" id="cross6t" @bind-Value="model.cross6t" />
+                </div>
+                <label for="cross6col" class="col-sm-2 col-form-label">Кросс номера колонка 6 (@nameof(model.cross6col))</label>
+                <div class="col-sm-2">
+                    <InputNumber class="form-control" id="cross6col" @bind-Value="model.cross6col" disabled="@(!model.cross6t)" />
                     <ValidationMessage For="@(() => model.cross6col)" />
                 </div>
+
             </div>
         </div>
 

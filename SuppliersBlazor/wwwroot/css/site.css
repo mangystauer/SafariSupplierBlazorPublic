@@ -74,7 +74,7 @@ a, .btn-link {
 }
 
 .form-container .form-group.row:nth-child(even) {
-    background-color: lightskyblue
+    background-color: lavender
 }
 
 .form-container .form-group.row:nth-child(odd) {
@@ -95,5 +95,10 @@ input[type='number'] {
 input[type='text'] {
     width: 160px;
     text-align: center;
+}
+
+.form-check-input {
+    margin-left: 2em;
+    vertical-align: -webkit-baseline-middle;
 }
 
