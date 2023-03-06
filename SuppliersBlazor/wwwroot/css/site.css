@@ -66,3 +66,34 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+
+#safari_entry_form > * {
+    display: flex;
+    margin: 25px 0 0 0;
+}
+
+.form-container .form-group.row:nth-child(even) {
+    background-color: lightskyblue
+}
+
+.form-container .form-group.row:nth-child(odd) {
+    background-color: white
+}
+
+input[type='number'] {
+    width: 80px;
+    text-align:center;
+}
+
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+input[type='text'] {
+    width: 160px;
+    text-align: center;
+}
+
