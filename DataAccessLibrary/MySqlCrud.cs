@@ -73,7 +73,7 @@ namespace DataAccessLibrary
             
         }
 
-
+        //Найти Automapper? если понадобится после stored procedure
         public void UpdateSupplier(Supplier supplier)
         {
             string sql = "update suppliers set supplier = @supplier," +
