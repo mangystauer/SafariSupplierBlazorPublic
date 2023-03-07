@@ -11,6 +11,8 @@ namespace DataAccessLibrary
     public class MySqlCrud : ICrud
     {
 
+        //ToDo пересадить процессы на Stored Procedures
+
         private readonly IDataAccess _db;
 
         private const string connectionStringName = "Default";

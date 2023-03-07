@@ -10,6 +10,8 @@ internal class Program
     private static void Main(string[] args)
     {
 
+        //Консольное решение для теста доступа к данным и DepInj
+
         var builder = new ConfigurationBuilder()
         .SetBasePath(Directory.GetCurrentDirectory()) //<--You would need to set the path
         .AddJsonFile("appsettings.json"); //or what ever file you have the settings
