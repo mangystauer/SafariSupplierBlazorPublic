@@ -21,28 +21,42 @@ namespace DataAccessLibrary
 
         }
 
-        public List<T> LoadData<T, U>(string sqlStatement, U parameters, string connectionStringName)
+        public List<T> LoadData<T, U>(string sqlStatement, U parameters, string connectionStringName, bool isStoredProcedure = false)
         {
             string connectionString = _config.GetConnectionString(connectionStringName);
+
+            CommandType commandType = CommandType.Text;
+
+            if (isStoredProcedure == true)
+            {
+                commandType = CommandType.StoredProcedure;
+            }
 
 
             using (IDbConnection connection = new MySqlConnection(connectionString))
             {
-                List<T> rows = connection.Query<T>(sqlStatement, parameters).ToList();
+                List<T> rows = connection.Query<T>(sqlStatement, parameters, commandType: commandType).ToList();
                 return rows;
             }
 
 
         }
 
-        public void SaveData<T>(string sqlStatement, T parameters, string connectionStringName)
+        public void SaveData<T>(string sqlStatement, T parameters, string connectionStringName, bool isStoredProcedure = false)
         {
 
             string connectionString = _config.GetConnectionString(connectionStringName);
+            
+            CommandType commandType = CommandType.Text;
+
+            if (isStoredProcedure == true)
+            {
+                commandType = CommandType.StoredProcedure;
+            }
 
             using (IDbConnection connection = new MySqlConnection(connectionString))
             {
-                connection.Execute(sqlStatement, parameters);
+                connection.Execute(sqlStatement, parameters, commandType: commandType);
             }
         }
 

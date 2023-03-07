@@ -26,18 +26,24 @@ namespace DataAccessLibrary
 
         public Task<List<Supplier>> GetAllSuppliersAsync()
         {
-            string sql = "select * from suppliers";
 
-            return Task.FromResult(_db.LoadData<Supplier, dynamic>(sql, new { }, connectionStringName));
+
+            //string sql = "select * from suppliers";
+            string sql = "sp_GetAllSuppliers";
+
+            return Task.FromResult(_db.LoadData<Supplier, dynamic>(sql, new { }, connectionStringName, true));
         }
 
 
         public Task<Supplier> GetSupplierAsync(int supplierId)
         {
-            string sql = "select * from suppliers where id = @Id";
+
+            //string sql = "select * from suppliers where id = @Id";
+            string sql = "sp_GetSupplierById";
+            
             Supplier output = new Supplier();
 
-            output = _db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, connectionStringName).FirstOrDefault();
+            output = _db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, connectionStringName, true).FirstOrDefault();
 
             if (output.supplier == null)
             {
