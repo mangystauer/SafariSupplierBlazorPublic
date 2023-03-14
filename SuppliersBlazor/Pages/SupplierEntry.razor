@@ -1,4 +1,4 @@
-﻿@page "/supplierentry"
+﻿@page "/supplierentry/{Value:int}"
 @using DataAccessLibrary;
 @inject ICrud sql
 
@@ -306,7 +306,7 @@
                 </div>
                 <label for="cross3col" class="col-sm-2 col-form-label">Кросс номера колонка 3 (@nameof(model.cross4col))</label>
                 <div class="col-sm-2">
-                    <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross4col" disabled="@(!model.cross3t)" />
+                    <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross3col" disabled="@(!model.cross3t)" />
                     <ValidationMessage For="@(() => model.cross4col)" />
                 </div>
             </div>
@@ -352,41 +352,34 @@
             </div>
         </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-        <button class="btn btn-primary" type="submit">Submit</button>
+        <button class="btn btn-primary" type="submit">Обновить поставщика</button>
     }
 </EditForm>
 
 
 
-
+s
 
 @code {
 
+    [Parameter]
+    public int Value { get; set; }
 
     private Supplier model = new();
 
+
     protected override async Task OnInitializedAsync()
-    {
-        model = await sql.GetSupplierAsync(20);
+    {     
+
+        model = await sql.GetSupplierAsync(Value);
     }
 
 
     private void ValidSubmit()
     {
-//процесс сохранения поставщика
-
+            sql.UpdateSupplier(model);
+        
     }
+
 
 }

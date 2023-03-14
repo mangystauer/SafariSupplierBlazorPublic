@@ -32,7 +32,7 @@ internal class Program
         //ReadAllSuppliers(sql);
         //ReadSupplier(serviceProvider.GetService<ICrud>(), 28);
 
-        CreateNewSupplier(serviceProvider.GetService<ICrud>());
+        //CreateNewSupplier(serviceProvider.GetService<ICrud>());
         //UpdateSupplier(serviceProvider.GetService<ICrud>());
         //DeleteSupplier(serviceProvider.GetService<ICrud>(), 38);
         //new comment for git
@@ -82,27 +82,27 @@ internal class Program
         Console.WriteLine($"{row.id}: {row.prefix} {row.supplier} {row.desc_manual}");
     }
 
-    private async static void CreateNewSupplier(ICrud sql)
-    {
-        Supplier supplier = new Supplier
-        {
-            //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@id, @supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
+    //private async static void CreateNewSupplier(ICrud sql)
+    //{
+    //    Supplier supplier = new Supplier
+    //    {
+    //        //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@id, @supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
 
-            supplier = "Test Sup5",
-            prefix ="TT2",
-            partnum_col = 1,
-            avail = 2,
-            cost = 5,
-            markupthreshold = 100000,
-            markupbelow = 0.3m,
-            markupabove= 0.2m
+    //        supplier = "Test Sup5",
+    //        prefix ="TT2",
+    //        partnum_col = 1,
+    //        avail = 2,
+    //        cost = 5,
+    //        markupthreshold = 100000,
+    //        markupbelow = 0.3m,
+    //        markupabove= 0.2m
 
-        };
+    //    };
 
-        await sql.CreateSupplierAsync(supplier);
+    //    await sql.CreateSupplierAsync(supplier);
 
 
-    }
+    //}
 
     private static void UpdateSupplier(ICrud sql)
     {

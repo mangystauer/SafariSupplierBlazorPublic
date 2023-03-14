@@ -52,9 +52,9 @@ namespace SuppliersBlazor.Models
         [Required]
         public int markupthreshold { get; set; }
         [Required]
-        public decimal markupbelow { get; set; }
+        public decimal markupbelow { get; set; } = 0.3m;
         [Required]
-        public decimal markupabove { get; set; }
+        public decimal markupabove { get; set; } = 0.2m;
         public bool cross1t { get; set; }
         public bool cross2t { get; set; }
         public bool cross3t { get; set; }
