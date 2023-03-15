@@ -22,7 +22,7 @@
     <ul>
         @foreach (var supplier in suppliers)
         {
-            <li>@supplier.id @supplier.supplier @supplier.prefix</li>
+            <li><a href="supplierentry/@supplier.id">@supplier.id @supplier.supplier @supplier.prefix</a></li>
         }
     </ul>
 

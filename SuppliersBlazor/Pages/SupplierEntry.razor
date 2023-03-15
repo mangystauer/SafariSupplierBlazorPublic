@@ -357,9 +357,6 @@
 </EditForm>
 
 
-
-s
-
 @code {
 
     [Parameter]
@@ -367,12 +364,23 @@ s
 
     private Supplier model = new();
 
+    private int supplierId;
 
-    protected override async Task OnInitializedAsync()
-    {     
+    protected override async Task OnParametersSetAsync()
+    {
+        base.OnParametersSetAsync();
 
-        model = await sql.GetSupplierAsync(Value);
+        supplierId = Value;
+
+        model = await sql.GetSupplierAsync(supplierId);
+
     }
+
+    //protected override async Task OnInitializedAsync()
+    //{     
+
+
+    //}
 
 
     private void ValidSubmit()
