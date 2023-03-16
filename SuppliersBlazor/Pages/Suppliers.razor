@@ -5,14 +5,23 @@
 
 <h3>Добавление нового поставщика</h3>
 
-<btn class="btn btn-primary" @onclick="OnClick">Создать поставщика</btn>
+<br />
+<ErrorBoundary>
+    <ChildContent>
+            <btn class="btn btn-primary" @onclick="OnClick">Создать поставщика</btn>    
+    </ChildContent>
+    <ErrorContent>
+        <p>
+            Не получилось создать поставщика.
+            <br />
+            @errorMessage
+        </p>
+    </ErrorContent>
 
-<EditForm Model = "model">
-    @if (model.id > 0)
-    {
-    <label class="form-group row">@model.id</label>
-    }
-</EditForm>
+</ErrorBoundary>
+<br />
+
+<br />
 
 <h3>Поставщики</h3>
 @* Вывод всех поставщиков *@
@@ -33,19 +42,33 @@
 @code {
 
     private int parameter;
+
+    private string? errorMessage;
+
     private void OnClick()
     {
-        var result = CreateNewSupplier(sql);
+        try
+        {
+            throw new Exception("Fake error for testing");
+            var result = CreateNewSupplier(sql);
 
-        parameter = model.id;
+            parameter = model.id;
 
-        Navigator.NavigateTo($"supplierentry/{parameter}");
+            Navigator.NavigateTo($"supplierentry/{parameter}");
+
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
     }
 
     private Supplier model = new();
 
     private IReadOnlyList<Supplier>? suppliers;
 
+   
+    
     protected override async Task OnInitializedAsync()
     {
         suppliers = await sql.GetAllSuppliersAsync();
@@ -69,7 +92,19 @@
 
             };
 
-        model = await sql.CreateSupplierAsync(supplier);
+        try
+        {
+
+            model = await sql.CreateSupplierAsync(supplier);
+        }
+        catch (Exception e)
+        {
+            errorMessage = e.Message;
+        }
+
+
+
+
 
 
     }

@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <NeutralLanguage>ru</NeutralLanguage>
+    <UserSecretsId>b72a1155-8bde-443a-801f-f8cedd618149</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
