@@ -1,14 +1,52 @@
 using DataAccessLibrary;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using SuppliersBlazor.Data;
+
+
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.EntityFrameworkCore;
+using SuppliersBlazor.Areas.Identity;
+
+
+var ConfBuilder = new ConfigurationBuilder()
+.SetBasePath(Directory.GetCurrentDirectory()) //<--You would need to set the path
+.AddJsonFile("appsettings.json"); //or what ever file you have the settings
+
+IConfiguration configuration = ConfBuilder.Build();
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+string connectionStringAuthDb = configuration.GetConnectionString("AuthDb");
+
+//Auth added manually
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySQL(connectionStringAuthDb));
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
 // Add services to the container.
+builder.Services.AddSingleton<IConfiguration>(configuration);
+
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
+
 builder.Services.AddTransient<IDataAccess, MySQLDataAccess>();
 builder.Services.AddTransient<ICrud, MySqlCrud>();
+
+
 
 var app = builder.Build();
 
@@ -26,7 +64,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+//app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+
+

@@ -24,9 +24,9 @@
 
 </div>
 
-<EditForm Model="model" OnValidSubmit="ValidSubmit">
-    <DataAnnotationsValidator></DataAnnotationsValidator>
-    <ValidationSummary></ValidationSummary>
+<EditForm Model="model" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
     @*    <div class="form-group row">
     <label for="supplier" class="form-label">Название поставщика (@nameof(model.supplier)):</label>
@@ -383,7 +383,7 @@
     //}
 
 
-    private void ValidSubmit()
+    private void HandleValidSubmit()
     {
             sql.UpdateSupplier(model);
         

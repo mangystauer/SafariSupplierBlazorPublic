@@ -8,7 +8,7 @@
 <br />
 <ErrorBoundary>
     <ChildContent>
-            <btn class="btn btn-primary" @onclick="OnClick">Создать поставщика</btn>    
+        <btn class="btn btn-outline-primary" @onclick="OnClick">Создать поставщика</btn>
     </ChildContent>
     <ErrorContent>
         <p>
@@ -47,20 +47,13 @@
 
     private void OnClick()
     {
-        try
-        {
-            throw new Exception("Fake error for testing");
+
             var result = CreateNewSupplier(sql);
 
             parameter = model.id;
 
             Navigator.NavigateTo($"supplierentry/{parameter}");
 
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
     }
 
     private Supplier model = new();
@@ -92,15 +85,9 @@
 
             };
 
-        try
-        {
+
 
             model = await sql.CreateSupplierAsync(supplier);
-        }
-        catch (Exception e)
-        {
-            errorMessage = e.Message;
-        }
 
 
 

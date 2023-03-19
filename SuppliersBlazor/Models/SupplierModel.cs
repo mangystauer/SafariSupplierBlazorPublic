@@ -13,10 +13,10 @@ namespace SuppliersBlazor.Models
         [Key]
         public int id { get; set; }
         [Required]
-        [StringLength(50, MinimumLength = 2)]
+        [StringLength(50, MinimumLength = 2, ErrorMessage = "Длина названия поставщика должна быть от 2 до 50 символов")]
         public string supplier { get; set; }
         [Required]
-        [StringLength(5, MinimumLength = 2)]
+        [StringLength(5, MinimumLength = 2, ErrorMessage ="Длина префикса должна быть от 2 до 5 символов")]
         public string prefix { get; set; }
         public string? p_time { get; set; }
         public bool massUpload { get; set; }
