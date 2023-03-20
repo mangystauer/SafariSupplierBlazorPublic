@@ -28,30 +28,30 @@ namespace DataAccessLibrary
         }
 
 
-        public async Task<List<Supplier>> GetAllSuppliersAsync()
+        public async Task<List<ISupplier>> GetAllSuppliersAsync()
         {
 
 
             //string sql = "select * from suppliers";
             string sql = "sp_GetAllSuppliers";
 
-            List<Supplier> rows = (await _db.LoadData<Supplier, dynamic>(sql, new { }, connectionStringName, true)).ToList();
+            var rows = await _db.LoadData<Supplier, dynamic>(sql, new { }, connectionStringName, true);
 
 
-            return rows;
+            return rows.ToList<ISupplier>();
 
         }
 
 
-        public async Task<Supplier> GetSupplierAsync(int supplierId)
+        public async Task<ISupplier> GetSupplierAsync(int supplierId)
         {
 
             //string sql = "select * from suppliers where id = @Id";
             string sql = "sp_GetSupplierById";
             
-            Supplier output = new Supplier();
+            //var output = new Supplier();
 
-            output = (await _db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, connectionStringName, true)).ToList().First();
+            var output = (await _db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, connectionStringName, true)).ToList<ISupplier>().First();
 
             //if (output.supplier == null)
             //{
@@ -65,7 +65,7 @@ namespace DataAccessLibrary
 
 
 
-        public async Task<Supplier> CreateSupplierAsync(Supplier supplier)
+        public async Task<ISupplier> CreateSupplierAsync(ISupplier supplier)
         {
             // Save the supplier
             //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
@@ -82,11 +82,12 @@ namespace DataAccessLibrary
 
             sql = "sp_SearchSupplierByPrefix";
 
-            Supplier output = new Supplier();
+            //Supplier output = new Supplier();
 
-            output = (await _db.LoadData<Supplier, dynamic>(sql, new { supplier = supplier.supplier, prefix = supplier.prefix }, connectionStringName, true)).ToList().First();
+            var rows = await _db.LoadData<Supplier, dynamic>(sql, new { supplier = supplier.supplier, prefix = supplier.prefix }, connectionStringName, true);
 
-            
+            return rows.ToList<ISupplier>().First();
+
             //if (output.supplier == null)
             //{
             //    // do something to tell the user that the record was not found
@@ -100,12 +101,12 @@ namespace DataAccessLibrary
 
             //return Task.FromResult((ISupplier)(await _db.LoadData<ISupplier, dynamic>(sql, new { supplier = supplier.supplier, prefix = supplier.prefix }, connectionStringName, true));
 
-            return output;
+            //return output;
 
         }
 
         //Найти Automapper? если понадобится после stored procedure
-        public async Task UpdateSupplier(Supplier supplier)
+        public async Task UpdateSupplier(ISupplier supplier)
         {
             //string sql = "update suppliers set supplier = @supplier," +
             //    " prefix = @prefix," +
@@ -157,6 +158,9 @@ namespace DataAccessLibrary
             //    " cross6col = @cross6col" +
             //    " where id = @id";
             //            db.SaveData(sql, new {supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove, supplier.id }, _connectionString);
+
+
+            supplier = (Supplier)supplier;
 
             string sql = "sp_UpdateSupplierSettingsBlazor";
 

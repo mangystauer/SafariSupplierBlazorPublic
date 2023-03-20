@@ -77,7 +77,7 @@ internal class Program
 
     private static async void ReadSupplier(ICrud sql, int supplierId)
     {
-        Supplier row = await sql.GetSupplierAsync(supplierId);
+        ISupplier row = await sql.GetSupplierAsync(supplierId);
 
         Console.WriteLine($"{row.id}: {row.prefix} {row.supplier} {row.desc_manual}");
     }

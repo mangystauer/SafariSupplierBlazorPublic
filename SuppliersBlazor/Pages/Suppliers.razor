@@ -7,7 +7,7 @@
 @inject NavigationManager Navigator
 
 
-    <h3>Добавление нового поставщика</h3>
+<h3>Добавление нового поставщика</h3>
 
 <br />
 <ErrorBoundary>
@@ -22,17 +22,25 @@
 <h3>Поставщики</h3>
 @* Вывод всех поставщиков *@
 
-@if (suppliers != null)
+
+
+@if (suppliers == null)
 {
+    <h4>Загрузка...</h4>
+}
+else
+{
+
+
     <ul>
         @foreach (var supplier in suppliers)
         {
             <li><a href="supplierentry/@supplier.id">@supplier.id @supplier.supplier @supplier.prefix</a></li>
         }
     </ul>
-
-
 }
+
+
 
 
 
@@ -44,14 +52,16 @@
 
     //private string? errorMessage;
 
-    private void OnClick()
+    private async Task OnClick()
     {
 
-            var result = CreateNewSupplier(sql);
+        var result = await CreateNewSupplier(sql);
 
-            parameter = model.id;
+        
 
-            Navigator.NavigateTo($"supplierentry/{parameter}");
+        parameter = result.id;
+
+        Navigator.NavigateTo($"supplierentry/{parameter}");
 
     }
 
@@ -59,35 +69,39 @@
 
     private IReadOnlyList<ISupplier>? suppliers;
 
-   
-    
+
+
+
+    private ISupplier supplier = new DisplaySupplierModel
+        {
+            //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@id, @supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
+
+            supplier = "Новый Поставщик - ИЗМЕНИТЬ",
+            prefix = "NP - ИЗМЕНИТЬ",
+            partnum_col = 1,
+            avail = 2,
+            cost = 5,
+            markupthreshold = 150000,
+            markupbelow = 0.3m,
+            markupabove = 0.2m
+
+        };
+
+
+
+
     protected override async Task OnInitializedAsync()
     {
         suppliers = await sql.GetAllSuppliersAsync();
     }
 
 
-    private async Task CreateNewSupplier(ICrud sql)
+    private async Task<ISupplier> CreateNewSupplier(ICrud sql)
     {
-        Supplier supplier = new Supplier
-            {
-                //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@id, @supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
-
-                supplier = "Новый Поставщик - ИЗМЕНИТЬ",
-                prefix = "NP - ИЗМЕНИТЬ",
-                partnum_col = 1,
-                avail = 2,
-                cost = 5,
-                markupthreshold = 150000,
-                markupbelow = 0.3m,
-                markupabove = 0.2m
-
-            };
 
 
-            model = await sql.CreateSupplierAsync(supplier);
 
-
+        return await sql.CreateSupplierAsync(supplier);
 
 
 
