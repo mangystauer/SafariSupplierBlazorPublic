@@ -27,17 +27,19 @@ IConfiguration configuration = ConfBuilder.Build();
 var builder = WebApplication.CreateBuilder(args);
 
 
+
 string connectionStringAuthDb = configuration.GetConnectionString("AuthDb");
 
 //Auth added manually
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(connectionStringAuthDb));
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 
 // Add services to the container.
-builder.Services.AddSingleton<IConfiguration>(configuration);
+//builder.Services.AddSingleton<IConfiguration>(configuration);
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -49,6 +51,8 @@ builder.Services.AddTransient<ICrud, MySqlCrud>();
 
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

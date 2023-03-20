@@ -1,23 +1,19 @@
 ﻿@page "/suppliers"
 @page "/"
+
+@attribute [Authorize(Roles = "Administrator")]
+
 @inject ICrud sql
 @inject NavigationManager Navigator
 
-<h3>Добавление нового поставщика</h3>
+
+    <h3>Добавление нового поставщика</h3>
 
 <br />
 <ErrorBoundary>
     <ChildContent>
         <btn class="btn btn-outline-primary" @onclick="OnClick">Создать поставщика</btn>
     </ChildContent>
-    <ErrorContent>
-        <p>
-            Не получилось создать поставщика.
-            <br />
-            @errorMessage
-        </p>
-    </ErrorContent>
-
 </ErrorBoundary>
 <br />
 
@@ -39,11 +35,14 @@
 }
 
 
+
+
+
 @code {
 
     private int parameter;
 
-    private string? errorMessage;
+    //private string? errorMessage;
 
     private void OnClick()
     {
@@ -58,7 +57,7 @@
 
     private Supplier model = new();
 
-    private IReadOnlyList<Supplier>? suppliers;
+    private IReadOnlyList<ISupplier>? suppliers;
 
    
     
@@ -84,7 +83,6 @@
                 markupabove = 0.2m
 
             };
-
 
 
             model = await sql.CreateSupplierAsync(supplier);

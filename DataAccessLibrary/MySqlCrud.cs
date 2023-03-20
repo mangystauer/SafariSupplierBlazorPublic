@@ -15,8 +15,12 @@ namespace DataAccessLibrary
 
         private readonly IDataAccess _db;
 
+        //Application Data
         private const string connectionStringName = "Default";
 
+
+        //User and Auth database accesss
+        private const string connectionStringAuthDb = "AuthDb";
 
         public MySqlCrud(IDataAccess db)
         {
@@ -24,18 +28,22 @@ namespace DataAccessLibrary
         }
 
 
-        public Task<List<Supplier>> GetAllSuppliersAsync()
+        public async Task<List<Supplier>> GetAllSuppliersAsync()
         {
 
 
             //string sql = "select * from suppliers";
             string sql = "sp_GetAllSuppliers";
 
-            return Task.FromResult(_db.LoadData<Supplier, dynamic>(sql, new { }, connectionStringName, true));
+            List<Supplier> rows = (await _db.LoadData<Supplier, dynamic>(sql, new { }, connectionStringName, true)).ToList();
+
+
+            return rows;
+
         }
 
 
-        public Task<Supplier> GetSupplierAsync(int supplierId)
+        public async Task<Supplier> GetSupplierAsync(int supplierId)
         {
 
             //string sql = "select * from suppliers where id = @Id";
@@ -43,27 +51,27 @@ namespace DataAccessLibrary
             
             Supplier output = new Supplier();
 
-            output = _db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, connectionStringName, true).FirstOrDefault();
+            output = (await _db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, connectionStringName, true)).ToList().First();
 
-            if (output.supplier == null)
-            {
-                // do something to tell the user that the record was not found
-                return null;
-            }
-            return Task.FromResult(output);
+            //if (output.supplier == null)
+            //{
+            //    // do something to tell the user that the record was not found
+            //    return null;
+            //}
+            return output;
         }
 
 
 
 
 
-        public Task<Supplier> CreateSupplierAsync(Supplier supplier)
+        public async Task<Supplier> CreateSupplierAsync(Supplier supplier)
         {
             // Save the supplier
             //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
             string sql = "sp_CreateNewSupplier";
 
-            _db.SaveData(sql,
+            await _db.SaveData(sql,
                         new { supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove },
                         connectionStringName, true);
 
@@ -76,24 +84,28 @@ namespace DataAccessLibrary
 
             Supplier output = new Supplier();
 
-            output = _db.LoadData<Supplier, dynamic>(sql, new { supplier = supplier.supplier, prefix = supplier.prefix }, connectionStringName, true).First();
+            output = (await _db.LoadData<Supplier, dynamic>(sql, new { supplier = supplier.supplier, prefix = supplier.prefix }, connectionStringName, true)).ToList().First();
 
-            if (output.supplier == null)
-            {
-                // do something to tell the user that the record was not found
-                return null;
-            }
+            
+            //if (output.supplier == null)
+            //{
+            //    // do something to tell the user that the record was not found
+            //    return null;
+            //}
 
             //int supplierId = _db.LoadData<IdLookupModel, dynamic>(
             //    sql,
             //    new { supplier.supplier, supplier.prefix },
             //    connectionStringName, true ).First().Id;
 
-            return Task.FromResult(output);
+            //return Task.FromResult((ISupplier)(await _db.LoadData<ISupplier, dynamic>(sql, new { supplier = supplier.supplier, prefix = supplier.prefix }, connectionStringName, true));
+
+            return output;
+
         }
 
         //Найти Automapper? если понадобится после stored procedure
-        public void UpdateSupplier(Supplier supplier)
+        public async Task UpdateSupplier(Supplier supplier)
         {
             //string sql = "update suppliers set supplier = @supplier," +
             //    " prefix = @prefix," +
@@ -148,7 +160,11 @@ namespace DataAccessLibrary
 
             string sql = "sp_UpdateSupplierSettingsBlazor";
 
-            _db.SaveData(sql, supplier, connectionStringName, true);
+
+                _db.SaveData(sql, supplier, connectionStringName, true);
+
+            
+
 
         }
 

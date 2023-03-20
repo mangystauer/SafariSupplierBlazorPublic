@@ -1,0 +1,52 @@
+﻿@page "/setuproles"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Configuration
+
+@inject RoleManager<IdentityRole> roleManager
+@inject UserManager<IdentityUser> userManager
+@inject IConfiguration config
+
+<h3>SetUpRoles</h3>
+
+<p>
+    Эта страница назначила роли и установила нужных пользователей как администраторов.
+</p>
+@code {
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await SetUpAuth();
+    }
+
+    private async Task SetUpAuth()
+    {
+        string[] roles = { "Administrator", "Manager" };
+
+        foreach (var role in roles)
+        {
+            var roleExists = await roleManager.RoleExistsAsync(role);
+
+            if (roleExists == false)
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+
+            }
+        }
+
+
+        string adminEmail = config.GetValue<string>("AdminUser");
+
+        var user = await userManager.FindByEmailAsync(adminEmail);
+
+        if (user != null)
+        {
+            foreach (var role in roles)
+            {
+                await userManager.AddToRoleAsync(user, role);
+            }
+
+        }
+
+    }
+}
+

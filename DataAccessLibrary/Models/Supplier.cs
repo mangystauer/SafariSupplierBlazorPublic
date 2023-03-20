@@ -7,16 +7,16 @@ using System.Threading.Tasks;
 
 namespace DataAccessLibrary.Models
 {
-    public class Supplier
+    public class Supplier : ISupplier
     {
-        
+
         [Key]
         public int id { get; set; }
         [Required]
-        [StringLength(50, MinimumLength = 2)]
+        [StringLength(50, MinimumLength = 2, ErrorMessage = "Длина названия поставщика должна быть от 2 до 50 символов")]
         public string supplier { get; set; }
         [Required]
-        [StringLength(5, MinimumLength = 2)]
+        [StringLength(5, MinimumLength = 2, ErrorMessage = "Длина префикса должна быть от 2 до 5 символов")]
         public string prefix { get; set; }
         public string? p_time { get; set; } = "2-5";
         public bool massUpload { get; set; } = false;
@@ -25,7 +25,7 @@ namespace DataAccessLibrary.Models
         public int? brand_col { get; set; } = null;
         [Required]
         public int partnum_col { get; set; }
-        public bool manual_description { get; set; } = false;
+        public bool manual_description { get; set; }
         public int? descr { get; set; } = 0;
         public string? desc_manual { get; set; } = null;
         [Required]
@@ -43,7 +43,7 @@ namespace DataAccessLibrary.Models
         public int? avail4 { get; set; } = 0;
         public int? avail5 { get; set; } = 0;
         public int? avail6 { get; set; } = 0;
-        public bool avail2t { get; set; } = false;   
+        public bool avail2t { get; set; } = false;
         public bool avail3t { get; set; } = false;
         public bool avail4t { get; set; } = false;
         public bool avail5t { get; set; } = false;

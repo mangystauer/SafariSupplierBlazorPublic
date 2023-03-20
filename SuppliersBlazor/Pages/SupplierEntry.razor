@@ -1,5 +1,8 @@
 ﻿@page "/supplierentry/{Value:int}"
 @using DataAccessLibrary;
+
+@attribute [Authorize(Roles = "Administrator")]
+
 @inject ICrud sql
 
 
@@ -362,7 +365,8 @@
     [Parameter]
     public int Value { get; set; }
 
-    private Supplier model = new();
+    private Supplier model = new Supplier();
+
 
     private int supplierId;
 
@@ -376,16 +380,20 @@
 
     }
 
+
+
     //protected override async Task OnInitializedAsync()
     //{     
+
+    
 
 
     //}
 
 
-    private void HandleValidSubmit()
+    private async Task HandleValidSubmit()
     {
-            sql.UpdateSupplier(model);
+            await sql.UpdateSupplier(model);
         
     }
 

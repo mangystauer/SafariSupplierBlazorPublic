@@ -21,7 +21,7 @@ namespace DataAccessLibrary
 
         }
 
-        public List<T> LoadData<T, U>(string sqlStatement, U parameters, string connectionStringName, bool isStoredProcedure = false)
+        public async Task<List<T>> LoadData<T, U>(string sqlStatement, U parameters, string connectionStringName, bool isStoredProcedure = false)
         {
             string connectionString = _config.GetConnectionString(connectionStringName);
 
@@ -35,14 +35,14 @@ namespace DataAccessLibrary
 
             using (IDbConnection connection = new MySqlConnection(connectionString))
             {
-                List<T> rows = connection.Query<T>(sqlStatement, parameters, commandType: commandType).ToList();
-                return rows;
+                var rows = await connection.QueryAsync<T>(sqlStatement, parameters, commandType: commandType);
+                return rows.ToList();
             }
 
 
         }
 
-        public void SaveData<T>(string sqlStatement, T parameters, string connectionStringName, bool isStoredProcedure = false)
+        public async Task SaveData<T>(string sqlStatement, T parameters, string connectionStringName, bool isStoredProcedure = false)
         {
 
             string connectionString = _config.GetConnectionString(connectionStringName);
@@ -56,7 +56,7 @@ namespace DataAccessLibrary
 
             using (IDbConnection connection = new MySqlConnection(connectionString))
             {
-                connection.Execute(sqlStatement, parameters, commandType: commandType);
+                await connection.ExecuteAsync(sqlStatement, parameters, commandType: commandType);
             }
         }
 

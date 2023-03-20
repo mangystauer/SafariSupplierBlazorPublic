@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataAccessLibrary.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SuppliersBlazor.Models
 {
-    public class SupplierModel
+    public class DisplaySupplierModel : ISupplier
     {
         
         [Key]
@@ -25,7 +26,7 @@ namespace SuppliersBlazor.Models
         public int? brand_col { get; set; }
         [Required]
         public int partnum_col { get; set; }
-        public string? manual_description { get; set; }
+        public bool manual_description { get; set; }
         public int? descr { get; set; }
         public string? desc_manual { get; set; }
         [Required]
@@ -67,6 +68,7 @@ namespace SuppliersBlazor.Models
         public int? cross4col { get; set; }
         public int? cross5col { get; set; }
         public int? cross6col { get; set; }
+        
     }
 
 
