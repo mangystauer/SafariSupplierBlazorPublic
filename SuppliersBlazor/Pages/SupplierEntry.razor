@@ -8,24 +8,8 @@
 
 <h3>Настройки поставщика</h3>
 
+<SupplierEntryInstructions />
 
-<div class="text-body col-sm-12">
-    Настройки импорта файла поставщика задаются через параметры ниже. 
-    <br />Они включают номера колонок из файла, их использование, ручное назначение.
-    <br />
-    Примеры ручного назначения:
-    <br />
-    Пример 1 - одна фирма производитель в файле (Gerat), поэтому его явно не указывают в какой-то из колонок.
-    <br />
-    Пример 2 - одинаковое описание товаров, когда в файле только диски - пишем тормозные диски.
-    <br />
-    <b>!!!!!Важно!!!!!</b>
-    <br />
-    Поле разрешить массовую загрузку должно быть включено, иначе поставщик не будет доступен для импорта файлов.
-    <br />
-    Включать его надо после того, как введены все настройки.
-
-</div>
 
 <EditForm Model="model" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
@@ -51,19 +35,19 @@
     {
         <div id="safari_entry_form" class="form-container">
             <div class="form-group row">
-                <label for="supplier" class="col-sm-2 col-form-label font-weight-bold" style="font-size: larger;" >Поставщик</label>
+                <label for="supplier" class="col-sm-2 col-form-label font-weight-bold" style="font-size: larger;">Поставщик</label>
                 <div class="col-sm-2">
-                    <InputText class="form-control" id="supplier" @bind-Value="model.supplier" placeholder="Supplier" />
+                    <InputText class="form-control" id="supplier" @bind-Value="model.supplier" placeholder="Название поставщика" />
                     <ValidationMessage For="@(() => model.supplier)" />
                 </div>
                 <label for="prefix" class="col-sm-2 col-form-label">Префикс, например NI</label>
                 <div class="col-sm-1">
-                    <InputText class="form-control" id="prefix" @bind-Value="model.prefix" placeholder="Prefix" />
+                    <InputText class="form-control" id="prefix" @bind-Value="model.prefix" placeholder="Префикс" />
                     <ValidationMessage For="@(() => model.prefix)" />
                 </div>
                 <label for="p_time" class="col-sm-2 col-form-label offset-sm-1">Время доставки до клиента, дней (например 2-5) </label>
                 <div class="col-sm-1">
-                    <InputText class="form-control" id="p_time" @bind-Value="model.p_time" placeholder="Processing Time" />
+                    <InputText class="form-control" id="p_time" @bind-Value="model.p_time" placeholder="Время на доставку" />
                     <ValidationMessage For="@(() => model.p_time)" />
                 </div>
             </div>
@@ -160,7 +144,7 @@
                     <InputNumber class="form-control" id="models" @bind-Value="model.models" disabled="@(model.hasnomodels)" />
                     <ValidationMessage For="@(() => model.models)" />
                 </div>
-            </div>            
+            </div>
 
             <div class="form-group row">
                 <label for="p_altnum1" class="col-sm-4 col-form-label">Колонка с альт номерами</label>
@@ -193,8 +177,8 @@
             </div>
 
             <div class="form-group row">
-                
-                
+
+
                 <label for="avail3t" class="col-sm-2 col-form-label">Использовать наличие на складе 3  (@nameof(model.avail3t))</label>
                 <div class="col-sm-2 offset-sm-2">
                     <InputCheckbox class="form-check-input" id="avail3t" @bind-Value="model.avail3t" />
@@ -227,8 +211,8 @@
                     <InputCheckbox class="form-check-input" id="avail5t" @bind-Value="model.avail5t" />
                     <ValidationMessage For="@(() => model.avail5t)" />
                 </div>
-                
-                
+
+
                 <label for="avail5" class="col-sm-2 col-form-label">Колонка наличия на складе 5 (@nameof(model.avail5))</label>
                 <div class="col-sm-2">
                     <InputNumber class="form-control" id="avail5" @bind-Value="model.avail5" disabled="@(!model.avail5t)" />
@@ -243,7 +227,7 @@
                     <InputCheckbox class="form-check-input" id="avail6t" @bind-Value="model.avail6t" />
                     <ValidationMessage For="@(() => model.avail6t)" />
                 </div>
-                
+
                 <label for="avail6" class="col-sm-2 col-form-label">Колонка наличия на складе 6 (@nameof(model.avail6))</label>
                 <div class="col-sm-2">
                     <InputNumber class="form-control" id="avail6" @bind-Value="model.avail6" disabled="@(!model.avail6t)" />
@@ -276,7 +260,7 @@
                     <ValidationMessage For="@(() => model.markupabove)" />
                 </div>
             </div>
-            
+
 
             <div class="form-group row">
                 <label for="cross1t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 1 (@nameof(model.cross1t))</label>
@@ -310,7 +294,6 @@
                 <label for="cross3col" class="col-sm-2 col-form-label">Кросс номера колонка 3 (@nameof(model.cross4col))</label>
                 <div class="col-sm-2">
                     <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross3col" disabled="@(!model.cross3t)" />
-                    <ValidationMessage For="@(() => model.cross4col)" />
                 </div>
             </div>
 
@@ -323,7 +306,6 @@
                 <label for="cross4col" class="col-sm-2 col-form-label">Кросс номера колонка 4 (@nameof(model.cross4col))</label>
                 <div class="col-sm-2">
                     <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross4col" disabled="@(!model.cross4t)" />
-                    <ValidationMessage For="@(() => model.cross4col)" />
                 </div>
             </div>
 
@@ -336,7 +318,6 @@
                 <label for="cross5col" class="col-sm-2 col-form-label">Кросс номера колонка 5 (@nameof(model.cross5col))</label>
                 <div class="col-sm-2">
                     <InputNumber class="form-control" id="cross5col" @bind-Value="model.cross5col" disabled="@(!model.cross5t)" />
-                    <ValidationMessage For="@(() => model.cross5col)" />
                 </div>
             </div>
 
@@ -349,44 +330,20 @@
                 <label for="cross6col" class="col-sm-2 col-form-label">Кросс номера колонка 6 (@nameof(model.cross6col))</label>
                 <div class="col-sm-2">
                     <InputNumber class="form-control" id="cross6col" @bind-Value="model.cross6col" disabled="@(!model.cross6t)" />
-                    <ValidationMessage For="@(() => model.cross6col)" />
                 </div>
 
             </div>
         </div>
+        <br />
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-        <button class="btn btn-primary" type="submit">Обновить поставщика</button>
+        <div class="d-grid gap-2 col-3 mx-auto">
+            <button class="btn btn-outline-primary" type="submit">Обновить поставщика</button>
+        </div>
+        <br />
     }
 </EditForm>
 
 
-@code {
 
-    [Parameter]
-    public int Value { get; set; }
-
-    private ISupplier model = new DisplaySupplierModel();
-
-
-    private int supplierId;
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await base.OnParametersSetAsync();
-
-        supplierId = Value;
-
-        model = await sql.GetSupplierAsync(supplierId);
-
-    }
-
-
-
-    private async Task HandleValidSubmit()
-    {
-            await sql.UpdateSupplierAsync(model);
-        
-    }
-
-
-}

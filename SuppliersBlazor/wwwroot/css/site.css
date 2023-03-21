@@ -74,7 +74,7 @@ a, .btn-link {
 }
 
 .form-container .form-group.row:nth-child(even) {
-    background-color: lavender
+    background-color: #E6FDFF
 }
 
 .form-container .form-group.row:nth-child(odd) {

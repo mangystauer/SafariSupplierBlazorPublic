@@ -6,11 +6,22 @@
 @inject ICrud sql
 @inject NavigationManager Navigator
 
+<W3Icons />
+
 <div class="form-group row">
         <div class="col-md-6">
             <h3>Поставщики</h3>
             @* Вывод всех поставщиков *@
-
+            
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:"><use xlink:href="#info-fill" /></svg>
+                <div>
+                    Ниже представлены все введенные поставщики с их настройками. 
+                    <br />
+                    Для редактирования настроек поставщика кликните на поставщика.
+                </div>
+            </div>
+                
         </div>
         <div class="col-md-6">
     <h3>Добавление нового поставщика</h3>
@@ -18,7 +29,9 @@
     <br />
     <ErrorBoundary>
         <ChildContent>
-                <button class="btn btn-outline-primary float-end" @onclick="OnClick">Создать поставщика</button>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                <button class="btn btn-outline-primary" @onclick="OnClick">Создать поставщика</button>
+                </div>
         </ChildContent>
     </ErrorBoundary>
     <br />
@@ -34,26 +47,28 @@
             else
             {
 
-                <div class="form-container table-striped col-md-8">
+                <div class="form-container table-striped col-md-6">
 
                     @foreach (var supplier in suppliers)
                     {
-                        <div class="form-group row col-md-8">
-                            <label class="col-md-8 col-form-label">
-                                <a href="supplierentry/@supplier.id">@supplier.id @supplier.supplier @supplier.prefix </a>
+                        <div class="form-group row col-md-12">
+                            <div class="col-md-8">
+                    <label class="align-middle">
+                        <a href="supplierentry/@supplier.id" class="link-primary">@supplier.id @supplier.supplier @supplier.prefix </a>
                             </label>
+                            </div>
                             <AuthorizeView Roles="Administrator">
                                             <Authorized>
-                            <div class="col-md-4 float-end">
+                        <div class="col-md-4 d-grid gap-2 d-md-flex justify-content-md-end">
                                 @if (idToDelete == supplier.id)
                                 {
-                                    <button class="btn btn-danger mx-2" @onclick="(() => DeleteSupplier(supplier.id))">
-                                        Подтвердить удаление Delete
+                                <button class="btn btn-danger me-md-2 margin-right: 0" @onclick="(() => DeleteSupplier(supplier.id))">
+                                        Подтвердить удаление
                                     </button>
                                 }
                                 else
                                 {
-                                    <button class="btn btn-outline-danger mx-2" @onclick="(() => idToDelete = supplier.id)">
+                                <button class="btn btn-outline-danger me-md-2 margin-right: 0" @onclick="(() => idToDelete = supplier.id)">
                                         Удалить
                                     </button>
                                 }

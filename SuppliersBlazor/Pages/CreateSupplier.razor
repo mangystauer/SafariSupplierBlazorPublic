@@ -9,25 +9,11 @@
 
 @if (showForm)
 {
-    <div class="text-body col-sm-12">
-        Настройки импорта файла поставщика задаются через параметры ниже.
-        <br />Они включают номера колонок из файла, их использование, ручное назначение.
-        <br />
-        Примеры ручного назначения:
-        <br />
-        Пример 1 - одна фирма производитель в файле (Gerat), поэтому его явно не указывают в какой-то из колонок.
-        <br />
-        Пример 2 - одинаковое описание товаров, когда в файле только диски - пишем тормозные диски.
-        <br />
-        <b>!!!!!Важно!!!!!</b>
-        <br />
-        Поле разрешить массовую загрузку должно быть включено, иначе поставщик не будет доступен для импорта файлов.
-        <br />
-        Включать его надо после того, как введены все настройки.
-
-    </div>
+    <SupplierEntryInstructions />
 
     <EditForm Model="model" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
         @*    <div class="form-group row">
     <label for="supplier" class="form-label">Название поставщика (@nameof(model.supplier)):</label>
     <div class="col-sm-10">
@@ -320,7 +306,10 @@
             <br />
             <DataAnnotationsValidator />
             <ValidationSummary />
-            <button class="btn btn-primary" type="submit">Создать поставщика</button>
+            <div class="d-grid gap-2 col-3 mx-auto">
+                <button class="btn btn-outline-primary" type="submit">Сохранить поставщика</button>
+            </div>
+            <br />
         }
 
         
