@@ -118,7 +118,7 @@ internal class Program
             markupbelow = 0.3m,
             markupabove = 0.2m
         };
-        sql.UpdateSupplier(supplier);
+        sql.UpdateSupplierAsync(supplier);
     }
 
     private static void DeleteSupplier(ICrud sql, int supplierId)

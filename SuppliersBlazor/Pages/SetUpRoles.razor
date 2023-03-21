@@ -47,6 +47,23 @@
 
         }
 
+        var managerEmails = config.GetSection("Managers").Get<List<ManagerModel>>();
+
+        foreach (var m in managerEmails)
+        {
+            var manager = await userManager.FindByEmailAsync(m.Email);
+
+            if (manager != null)
+            {
+                    //await userManager.RemoveFromRolesAsync(manager, roles);
+                    await userManager.AddToRoleAsync(manager, "Manager");
+
+
+            }
+
+        }
+        
+
     }
 }
 

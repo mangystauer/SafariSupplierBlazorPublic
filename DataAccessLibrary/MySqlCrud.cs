@@ -51,21 +51,21 @@ namespace DataAccessLibrary
             
             //var output = new Supplier();
 
-            var output = (await _db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, connectionStringName, true)).ToList<ISupplier>().First();
+            var output = (await _db.LoadData<Supplier, dynamic>(sql, new { Id = supplierId }, connectionStringName, true)).ToList<ISupplier>();
 
             //if (output.supplier == null)
             //{
             //    // do something to tell the user that the record was not found
             //    return null;
             //}
-            return output;
+            return output.FirstOrDefault();
         }
 
 
 
 
 
-        public async Task<ISupplier> CreateSupplierAsync(ISupplier supplier)
+        public async Task<IdLookupModel> CreateSupplierAsync(ISupplier supplier)
         {
             // Save the supplier
             //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
@@ -84,9 +84,9 @@ namespace DataAccessLibrary
 
             //Supplier output = new Supplier();
 
-            var rows = await _db.LoadData<Supplier, dynamic>(sql, new { supplier = supplier.supplier, prefix = supplier.prefix }, connectionStringName, true);
+            var rows = await _db.LoadData<IdLookupModel, dynamic>(sql, new { supplier = supplier.supplier, prefix = supplier.prefix }, connectionStringName, true);
 
-            return rows.ToList<ISupplier>().First();
+            return rows.ToList<IdLookupModel>().FirstOrDefault();
 
             //if (output.supplier == null)
             //{
@@ -106,7 +106,7 @@ namespace DataAccessLibrary
         }
 
         //Найти Automapper? если понадобится после stored procedure
-        public async Task UpdateSupplier(ISupplier supplier)
+        public async Task UpdateSupplierAsync(ISupplier supplier)
         {
             //string sql = "update suppliers set supplier = @supplier," +
             //    " prefix = @prefix," +
@@ -160,19 +160,19 @@ namespace DataAccessLibrary
             //            db.SaveData(sql, new {supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove, supplier.id }, _connectionString);
 
 
-            supplier = (Supplier)supplier;
+            //supplier = (Supplier)supplier;
 
             string sql = "sp_UpdateSupplierSettingsBlazor";
 
 
-                _db.SaveData(sql, supplier, connectionStringName, true);
+                await _db.SaveData(sql, supplier, connectionStringName, true);
 
             
 
 
         }
 
-        public void RemoveSupplier(int supplierId)
+        public async Task RemoveSupplier(int supplierId)
         {
 
             string sql = "delete from suppliers where id = @id";

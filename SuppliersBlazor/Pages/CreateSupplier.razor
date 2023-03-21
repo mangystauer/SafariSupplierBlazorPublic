@@ -1,0 +1,375 @@
+﻿@page "/createSupplier"
+@attribute [Authorize(Roles = "Administrator")]
+
+@inject ICrud sql
+@inject NavigationManager Navigator
+
+
+<h3>Создание поставщика</h3>
+
+@if (showForm)
+{
+    <div class="text-body col-sm-12">
+        Настройки импорта файла поставщика задаются через параметры ниже.
+        <br />Они включают номера колонок из файла, их использование, ручное назначение.
+        <br />
+        Примеры ручного назначения:
+        <br />
+        Пример 1 - одна фирма производитель в файле (Gerat), поэтому его явно не указывают в какой-то из колонок.
+        <br />
+        Пример 2 - одинаковое описание товаров, когда в файле только диски - пишем тормозные диски.
+        <br />
+        <b>!!!!!Важно!!!!!</b>
+        <br />
+        Поле разрешить массовую загрузку должно быть включено, иначе поставщик не будет доступен для импорта файлов.
+        <br />
+        Включать его надо после того, как введены все настройки.
+
+    </div>
+
+    <EditForm Model="model" OnValidSubmit="HandleValidSubmit">
+        @*    <div class="form-group row">
+    <label for="supplier" class="form-label">Название поставщика (@nameof(model.supplier)):</label>
+    <div class="col-sm-10">
+    <InputText id="supplier" class="form-control" placeholder="Supplier" @bind-Value="@model.supplier" />
+    <ValidationMessage For="@(() => model.supplier)" />
+
+    </div>
+    </div>*@
+
+
+        @*<InputText @bind-Value="model.supplier" placeholder="Название поставщика" class="form-control"></InputText>*@
+
+        @*    <InputText @bind-Value="model.prefix" placeholder="Префикс" class="form-control"></InputText>
+    *@
+
+
+        @if (model != null)
+        {
+            <div id="safari_entry_form" class="form-container">
+                <div class="form-group row">
+                    <label for="supplier" class="col-sm-2 col-form-label font-weight-bold" style="font-size: larger;">Поставщик</label>
+                    <div class="col-sm-2">
+                        <InputText class="form-control" id="supplier" @bind-Value="model.supplier" placeholder="Supplier" />
+                    </div>
+                    <label for="prefix" class="col-sm-2 col-form-label">Префикс, например NI</label>
+                    <div class="col-sm-1">
+                        <InputText class="form-control" id="prefix" @bind-Value="model.prefix" placeholder="Prefix" />
+                    </div>
+                    <label for="p_time" class="col-sm-2 col-form-label offset-sm-1">Время доставки до клиента, дней (например 2-5) </label>
+                    <div class="col-sm-1">
+                        <InputText class="form-control" id="p_time" @bind-Value="model.p_time" placeholder="Время доставки до клиента" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="id" class="col-sm-2 col-form-label">Уникальный номер (задается автоматически)</label>
+                    <div class="col-sm-2 offset-sm-2">
+                        <InputNumber class="form-control" id="id" @bind-Value="model.id" placeholder="Id" disabled="true" />
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-check">
+                            <InputCheckbox class="form-check-input" id="massUpload" @bind-Value="model.massUpload" />
+                            <label class="form-check-label" for="massUpload">Разрешить массовую загрузку </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="brand_col" class="col-sm-2 col-form-label">Колонка с брендом</label>
+                    <div class="col-sm-2 offset-sm-2">
+                        <InputNumber class="form-control" id="brand_col" @bind-Value="model.brand_col" placeholder="Brand Column" />
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-check">
+                            <InputCheckbox class="form-check-input" id="hasnobrand" @bind-Value="model.hasnobrand" />
+                            <label class="form-check-label" for="hasnobrand">Нет колонки бренда</label>
+                        </div>
+                    </div>
+                    <label for="brand" class="col-sm-2 col-form-label">Задать бренд вручную (если нет колонки бренда) </label>
+                    <div class="col-sm-2">
+                        <InputText class="form-control" id="brand" @bind-Value="model.brand" placeholder="Фирма производитель" disabled="@(!model.hasnobrand)" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="partnum_col" class="col-sm-4 col-form-label">Колонка с партномерами </label>
+                    <div class="col-sm-4">
+                        <InputNumber class="form-control" id="partnum_col" @bind-Value="model.partnum_col" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="descr" class="col-sm-4 col-form-label">Колонка описания товара</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="descr" @bind-Value="model.descr" />
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-check">
+                            <InputCheckbox class="form-check-input" id="manual_description" @bind-Value="model.manual_description" />
+                            <label for="manual_description" class="form-check-label">Нет колонки описания товара, использовать ручное</label>
+                        </div>
+                    </div>
+                    <label for="desc_manual" class="col-sm-2 col-form-label">Ручное описание (одинаковое для всех товров)</label>
+                    <div class="col-sm-2">
+                        <InputText class="form-control" id="desc_manual" @bind-Value="model.desc_manual" placeholder="Ручное описание" disabled="@(!model.manual_description)" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="avail" class="col-sm-4 col-form-label">Колонка наличия на складе</label>
+                    <div class="col-sm-4">
+                        <InputNumber class="form-control" id="avail" @bind-Value="model.avail" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="hasnoqty" class="col-sm-4 col-form-label">Нет колонки партии (шт в упаковке)</label>
+                    <div class="col-sm-2 margin-left:2em; ">
+                        <InputCheckbox class="form-check-input" id="hasnoqty" @bind-Value="model.hasnoqty" />
+                    </div>
+                    <label for="qty" class="col-sm-2 col-form-label">Колонка партии (шт в упаковке)</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="qty" @bind-Value="model.qty" disabled="@(model.hasnoqty)" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="cost" class="col-sm-4 col-form-label">Колонка стоимости </label>
+                    <div class="col-sm-4">
+                        <InputNumber class="form-control" id="cost" @bind-Value="model.cost" step="0.01" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="hasnomodels" class="col-sm-4 col-form-label">Нет колонки применения к моделям машин</label>
+                    <div class="col-sm-2">
+                        <InputCheckbox class="form-check-input" id="hasnomodels" @bind-Value="model.hasnomodels" />
+                    </div>
+                    <label for="models" class="col-sm-2 col-form-label">Колонка моделей применения машин</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="models" @bind-Value="model.models" disabled="@(model.hasnomodels)" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="p_altnum1" class="col-sm-4 col-form-label">Колонка с альт номерами</label>
+                    <div class="col-sm-4">
+                        <InputNumber class="form-control" id="p_altnum1" @bind-Value="model.p_altnum1" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="avail1" class="col-sm-4 col-form-label">Колонка наличия на складе 0 (@nameof(model.avail1))</label>
+                    <div class="col-sm-4">
+                        <InputNumber class="form-control" id="avail1" @bind-Value="model.avail1" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="avail2t" class="col-sm-2 col-form-label">Использовать наличие на складе 2  (@nameof(model.avail2t))</label>
+                    <div class="col-sm-2 offset-sm-2">
+                        <InputCheckbox class="form-check-input" id="avail2t" @bind-Value="model.avail2t" />
+                    </div>
+                    <label for="avail2" class="col-sm-2 col-form-label">Колонка наличия на складе 2 (@nameof(model.avail2))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="avail2" @bind-Value="model.avail2" disabled="@(!model.avail2t)" />
+                    </div>
+
+                </div>
+
+                <div class="form-group row">
+
+
+                    <label for="avail3t" class="col-sm-2 col-form-label">Использовать наличие на складе 3  (@nameof(model.avail3t))</label>
+                    <div class="col-sm-2 offset-sm-2">
+                        <InputCheckbox class="form-check-input" id="avail3t" @bind-Value="model.avail3t" />
+                    </div>
+
+                    <label for="avail3" class="col-sm-2 col-form-label">Колонка наличия на складе 3 (@nameof(model.avail3))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="avail3" @bind-Value="model.avail3" disabled="@(!model.avail3t)" />
+                    </div>
+                </div>
+                <div class="form-group row">
+
+                    <label for="avail4t" class="col-sm-2 col-form-label">Использовать наличие на складе 4 (@nameof(model.avail4t))</label>
+                    <div class="col-sm-2 offset-sm-2">
+                        <InputCheckbox class="form-check-input" id="avail4t" @bind-Value="model.avail4t" />
+                    </div>
+
+                    <label for="avail4" class="col-sm-2 col-form-label">Колонка наличия на складе 4 (@nameof(model.avail4))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="avail4" @bind-Value="model.avail4" disabled="@(!model.avail4t)" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="avail5t" class="col-sm-2 col-form-label">Использовать наличие на складе 5 (@nameof(model.avail5t))</label>
+                    <div class="col-sm-2 offset-sm-2">
+                        <InputCheckbox class="form-check-input" id="avail5t" @bind-Value="model.avail5t" />
+                    </div>
+
+
+                    <label for="avail5" class="col-sm-2 col-form-label">Колонка наличия на складе 5 (@nameof(model.avail5))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="avail5" @bind-Value="model.avail5" disabled="@(!model.avail5t)" />
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    <label for="avail6t" class="col-sm-2 col-form-label">Использовать наличие на складе 6  (@nameof(model.avail6t))</label>
+                    <div class="col-sm-2 offset-sm-2">
+                        <InputCheckbox class="form-check-input" id="avail6t" @bind-Value="model.avail6t" />
+                    </div>
+
+                    <label for="avail6" class="col-sm-2 col-form-label">Колонка наличия на складе 6 (@nameof(model.avail6))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="avail6" @bind-Value="model.avail6" disabled="@(!model.avail6t)" />
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    <label for="not_round_to_200" class="col-sm-4 col-form-label">Не округлять до 200 тг (@nameof(model.not_round_to_200))</label>
+                    <div class="col-sm-4">
+                        <InputCheckbox class="form-check-input" id="not_round_to_200" @bind-Value="model.not_round_to_200" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="markupthreshold" class="col-sm-4 col-form-label">Порог стоимости для наценки, тг</label>
+                    <div class="col-sm-1">
+                        <InputNumber class="form-control" id="markupthreshold" @bind-Value="model.markupthreshold" step="1" />
+                    </div>
+                    <label for="markupbelow" class="col-sm-2 col-form-label offset-sm-1">Наценка до порога стоимости (напр 30% как 0,3)</label>
+                    <div class="col-sm-1">
+                        <InputNumber class="form-control" id="markupbelow" @bind-Value="model.markupbelow" step="0.01" />
+                    </div>
+                    <label for="markupabove" class="col-sm-2 col-form-label">Наценка выше порога стоимости (напр 25% как 0,25)</label>
+                    <div class="col-sm-1">
+                        <InputNumber class="form-control" id="markupabove" @bind-Value="model.markupabove" step="0.01" />
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    <label for="cross1t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 1 (@nameof(model.cross1t))</label>
+                    <div class="col-sm-2">
+                        <InputCheckbox class="form-check-input" id="cross1t" @bind-Value="model.cross1t" />
+                    </div>
+                    <label for="cross1col" class="col-sm-2 col-form-label">Кросс номера колонка 1 (@nameof(model.cross1col))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="cross1col" @bind-Value="model.cross1col" disabled="@(!model.cross1t)" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="cross2t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 2 (@nameof(model.cross2t))</label>
+                    <div class="col-sm-2">
+                        <InputCheckbox class="form-check-input" id="cross2t" @bind-Value="model.cross2t" />
+                    </div>
+
+                    <label for="cross2col" class="col-sm-2 col-form-label">Кросс номера колонка 2 (@nameof(model.cross2col))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="cross2col" @bind-Value="model.cross2col" disabled="@(!model.cross2t)" />
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    <label for="cross3t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 3 (@nameof(model.cross3t))</label>
+                    <div class="col-sm-2">
+                        <InputCheckbox class="form-check-input" id="cross3t" @bind-Value="model.cross3t" />
+                    </div>
+                    <label for="cross3col" class="col-sm-2 col-form-label">Кросс номера колонка 3 (@nameof(model.cross4col))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross3col" disabled="@(!model.cross3t)" />
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    <label for="cross4t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 4 (@nameof(model.cross4t))</label>
+                    <div class="col-sm-2">
+                        <InputCheckbox class="form-check-input" id="cross4t" @bind-Value="model.cross4t" />
+                    </div>
+                    <label for="cross4col" class="col-sm-2 col-form-label">Кросс номера колонка 4 (@nameof(model.cross4col))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="cross4col" @bind-Value="model.cross4col" disabled="@(!model.cross4t)" />
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    <label for="cross5t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 5 (@nameof(model.cross5t))</label>
+                    <div class="col-sm-2">
+                        <InputCheckbox class="form-check-input" id="cross5t" @bind-Value="model.cross5t" />
+                    </div>
+                    <label for="cross5col" class="col-sm-2 col-form-label">Кросс номера колонка 5 (@nameof(model.cross5col))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="cross5col" @bind-Value="model.cross5col" disabled="@(!model.cross5t)" />
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    <label for="cross6t" class="col-sm-4 col-form-label">Использовать колонку кросс номеров 6 (@nameof(model.cross6t))</label>
+                    <div class="col-sm-2">
+                        <InputCheckbox class="form-check-input" id="cross6t" @bind-Value="model.cross6t" />
+                    </div>
+                    <label for="cross6col" class="col-sm-2 col-form-label">Кросс номера колонка 6 (@nameof(model.cross6col))</label>
+                    <div class="col-sm-2">
+                        <InputNumber class="form-control" id="cross6col" @bind-Value="model.cross6col" disabled="@(!model.cross6t)" />
+                    </div>
+
+                </div>
+            </div>
+            <br />
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <button class="btn btn-primary" type="submit">Создать поставщика</button>
+        }
+
+        
+
+    </EditForm>
+}
+else
+{
+    if (message is not null)
+    {
+        <label class="text-success">@message</label>
+        <br />
+        <button class="btn btn-outline-primary" @onclick="OpenForm">Создать еще поставщика</button>
+    }
+}
+
+@code {
+
+    private bool showForm = true;
+    private string message = "";
+
+    private ISupplier model = new DisplaySupplierModel{
+
+            //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@id, @supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
+
+            //supplier = "Новый Поставщик - ИЗМЕНИТЬ",
+            //prefix = "NP - ИЗМЕНИТЬ"
+            //partnum_col = 3,
+            //avail = 4,
+            //cost = 5,
+            //markupthreshold = 150000,
+            //markupbelow = 0.3m,
+            //markupabove = 0.2m
+
+        };
+
+
+    private async Task HandleValidSubmit()
+    {
+        var result = await sql.CreateSupplierAsync(model);
+        message = $"Поставщик успешно создан под уникальным номером {result.Id}";
+        showForm = false;
+    }
+
+    private async Task OpenForm()
+    {
+        model = new DisplaySupplierModel();
+        showForm = true;
+
+    }
+
+}

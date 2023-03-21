@@ -21,14 +21,18 @@ namespace DataAccessLibrary.Models
         public string? p_time { get; set; } = "2-5";
         public bool massUpload { get; set; } = false;
         public bool hasnobrand { get; set; } = false;
+        [Range(1, 100, ErrorMessage = "Колонка может быть в диапазоне от 1-ой до 100-ой")]
         public string? brand { get; set; } = null;
+        [Range(1, 100, ErrorMessage = "Колонка может быть в диапазоне от 1-ой до 100-ой")]
         public int? brand_col { get; set; } = null;
         [Required]
+        [Range(1, 100, ErrorMessage = "Колонка может быть в диапазоне от 1-ой до 100-ой")]
         public int partnum_col { get; set; }
         public bool manual_description { get; set; }
         public int? descr { get; set; } = 0;
         public string? desc_manual { get; set; } = null;
         [Required]
+        [Range(1, 100, ErrorMessage = "Колонка может быть в диапазоне от 1-ой до 100-ой")]
         public int avail { get; set; }
         public bool hasnoqty { get; set; } = false;
         public int? qty { get; set; } = null;
@@ -36,6 +40,7 @@ namespace DataAccessLibrary.Models
         public decimal cost { get; set; }
         public bool hasnomodels { get; set; } = false;
         public int? models { get; set; } = null;
+
         public int? p_altnum1 { get; set; } = null;
         public int? avail1 { get; set; } = 0;
         public int? avail2 { get; set; } = 0;
