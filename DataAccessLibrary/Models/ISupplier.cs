@@ -1,4 +1,6 @@
-﻿namespace DataAccessLibrary.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DataAccessLibrary.Models
 {
     public interface ISupplier
     {

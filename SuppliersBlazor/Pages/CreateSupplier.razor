@@ -220,13 +220,18 @@
                     <div class="col-sm-1">
                         <InputNumber class="form-control" id="markupthreshold" @bind-Value="model.markupthreshold" step="1" />
                     </div>
-                    <label for="markupbelow" class="col-sm-2 col-form-label offset-sm-1">Наценка до порога стоимости (напр 30% как 0,3)</label>
+                    <label for="markupbelow" class="col-sm-2 col-form-label offset-sm-1">Наценка до порога стоимости (напр для 30% ввести 30)</label>
                     <div class="col-sm-1">
-                        <InputNumber class="form-control" id="markupbelow" @bind-Value="model.markupbelow" step="0.01" />
+                        <input type="number" class="form-control" id="markupBelowSet" value="@MarkupBelowInt" @onchange="@((ChangeEventArgs e) => HandleBelowMarkup(e))" step="1"> </input>
                     </div>
-                    <label for="markupabove" class="col-sm-2 col-form-label">Наценка выше порога стоимости (напр 25% как 0,25)</label>
+                    <label for="markupabove" class="col-sm-2 col-form-label">Наценка выше порога стоимости (напр для 25% ввести 25)</label>
                     <div class="col-sm-1">
-                        <InputNumber class="form-control" id="markupabove" @bind-Value="model.markupabove" step="0.01" />
+                        @*                    <InputNumber class="form-control" id="markupabove" @bind-Value="model.markupabove"/>
+                <ValidationMessage For="@(() => model.markupabove)" />*@
+
+                        @*                    <InputText class="form-control" @bind-Value="MarkupAboveString" @oninput="OnAboveMarkupChange" />*@
+                        <input type="number" class="form-control" id="markupAboveSet" value="@MarkupAboveInt" @onchange="@((ChangeEventArgs e) => HandleAboveMarkup(e))"> </input>
+
                     </div>
                 </div>
 
@@ -331,6 +336,15 @@ else
     private bool showForm = true;
     private string message = "";
 
+    private string MarkupAboveString = "";
+    private string MarkupBelowString = "";
+    private int MarkupAboveInt = 0;
+    private int MarkupBelowInt = 0;
+    private decimal MarkupAboveDecimal = 0;
+    private decimal MarkupBelowDecimal = 0;
+
+    private bool showSuccessMessage;
+
     private ISupplier model = new DisplaySupplierModel{
 
             //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@id, @supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
@@ -358,6 +372,27 @@ else
     {
         model = new DisplaySupplierModel();
         showForm = true;
+
+    }
+
+    private async Task HandleBelowMarkup(ChangeEventArgs args)
+    {
+        decimal result;
+        int.TryParse(args.Value?.ToString(), out MarkupBelowInt);
+        decimal.TryParse(args.Value?.ToString(), out result);
+        result = result / 100;
+
+        await Task.Run(() => model.markupbelow = result);
+
+    }
+
+    private async Task HandleAboveMarkup(ChangeEventArgs args)
+    {
+        decimal result;
+        decimal.TryParse(args.Value?.ToString(), out result);
+        result = result / 100;
+
+        await Task.Run(() => model.markupabove = result);
 
     }
 

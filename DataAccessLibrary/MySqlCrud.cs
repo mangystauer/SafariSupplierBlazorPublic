@@ -69,10 +69,10 @@ namespace DataAccessLibrary
         {
             // Save the supplier
             //string sql = "insert into suppliers (supplier, prefix, partnum_col, avail, cost, markupthreshold, markupbelow, markupabove) values (@supplier, @prefix, @partnum_col, @avail, @cost, @markupthreshold, @markupbelow, @markupabove);";
-            string sql = "sp_CreateNewSupplier";
+            string sql = "sp_CreateNewSupplierFull";
 
             await _db.SaveData(sql,
-                        new { supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove },
+                        new { supplier.supplier, supplier.prefix, supplier.partnum_col, supplier.avail, supplier.cost, supplier.markupthreshold, supplier.markupbelow, supplier.markupabove, supplier.p_time, supplier.massUpload, supplier.hasnobrand, supplier.brand, supplier.brand_col, supplier.manual_description, supplier.descr, supplier.desc_manual, supplier.hasnoqty, supplier.qty, supplier.hasnomodels, supplier.models, supplier.p_altnum1, supplier.avail1, supplier.avail2, supplier.avail3, supplier.avail4, supplier.avail5, supplier.avail6, supplier.avail2t, supplier.avail3t, supplier.avail4t, supplier.avail5t, supplier.avail6t, supplier.not_round_to_200, supplier.cross1t, supplier.cross2t, supplier.cross3t, supplier.cross4t, supplier.cross5t, supplier.cross6t, supplier.cross1col, supplier.cross2col, supplier.cross3col, supplier.cross4col, supplier.cross5col, supplier.cross6col },
                         connectionStringName, true);
 
 
@@ -80,11 +80,14 @@ namespace DataAccessLibrary
 
             //sql = "select id from suppliers where supplier = @supplier and prefix = @prefix;";
 
+            string supname = supplier.supplier;
+            string ppr = supplier.prefix;
+
             sql = "sp_SearchSupplierByPrefix";
 
             //Supplier output = new Supplier();
 
-            var rows = await _db.LoadData<IdLookupModel, dynamic>(sql, new { supplier = supplier.supplier, prefix = supplier.prefix }, connectionStringName, true);
+            var rows = await _db.LoadData<IdLookupModel, dynamic>(sql, new { supname, ppr }, connectionStringName, true);
 
             return rows.ToList<IdLookupModel>().FirstOrDefault();
 

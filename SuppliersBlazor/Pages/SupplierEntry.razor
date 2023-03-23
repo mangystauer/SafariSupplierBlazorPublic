@@ -249,15 +249,18 @@
                     <InputNumber class="form-control" id="markupthreshold" @bind-Value="model.markupthreshold" step="1" />
                     <ValidationMessage For="@(() => model.markupthreshold)" />
                 </div>
-                <label for="markupbelow" class="col-sm-2 col-form-label offset-sm-1">Наценка до порога стоимости (напр 30% как 0,3)</label>
+                <label for="markupbelow" class="col-sm-2 col-form-label offset-sm-1">Наценка до порога стоимости (напр для 30% ввести 30)</label>
                 <div class="col-sm-1">
-                    <InputNumber class="form-control" id="markupbelow" @bind-Value="model.markupbelow" step="0.01" />
-                    <ValidationMessage For="@(() => model.markupbelow)" />
-                </div>
-                <label for="markupabove" class="col-sm-2 col-form-label">Наценка выше порога стоимости (напр 25% как 0,25)</label>
+                    <input type="number" class="form-control" id="markupBelowSet" value="@MarkupBelowInt" @onchange="@((ChangeEventArgs e) => HandleBelowMarkup(e))" step="1"> </input>
+                        </div>
+                <label for="markupabove" class="col-sm-2 col-form-label">Наценка выше порога стоимости (напр для 25% ввести 25)</label>
                 <div class="col-sm-1">
-                    <InputNumber class="form-control" id="markupabove" @bind-Value="model.markupabove" step="0.01" />
-                    <ValidationMessage For="@(() => model.markupabove)" />
+@*                    <InputNumber class="form-control" id="markupabove" @bind-Value="model.markupabove"/>
+                    <ValidationMessage For="@(() => model.markupabove)" />*@
+
+@*                    <InputText class="form-control" @bind-Value="MarkupAboveString" @oninput="OnAboveMarkupChange" />*@
+                    <input type="number" class="form-control" id="markupAboveSet" value="@MarkupAboveInt" @onchange="@((ChangeEventArgs e) => HandleAboveMarkup(e))"> </input>
+
                 </div>
             </div>
 
@@ -338,9 +341,23 @@
         <DataAnnotationsValidator />
         <ValidationSummary />
 
+        @if (showSuccessMessage)
+        {
+            <br />
+            <br />
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading text-center">Поставщик успешно сохранен</h4>
+            </div>
+            <br />
+            <br />
+        }
+
         <div class="d-grid gap-2 col-3 mx-auto">
             <button class="btn btn-outline-primary" type="submit">Обновить поставщика</button>
         </div>
+
+
+        <br />
         <br />
     }
 </EditForm>

@@ -59,8 +59,10 @@ namespace SuppliersBlazor.Models
         [Required]
         public int markupthreshold { get; set; } = 150000;
         [Required]
+        [DisplayFormat(DataFormatString = "{0:0.##}%")]
         public decimal markupbelow { get; set; } = 0.3m;
         [Required]
+        [DisplayFormat(DataFormatString = "{0:0.##}%")]
         public decimal markupabove { get; set; } = 0.25m;
         public bool cross1t { get; set; } = false;
         public bool cross2t { get; set; } = false;
@@ -74,6 +76,10 @@ namespace SuppliersBlazor.Models
         public int? cross4col { get; set; } = null;
         public int? cross5col { get; set; } = null;
         public int? cross6col { get; set; } = null;
+
+        //
+        public string MarkUpBelowString { get; set; }
+        public string MarkUpAboveString { get; set; }
 
     }
 
