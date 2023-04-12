@@ -19,6 +19,7 @@ using DataAccessLibrary.DataService.Shatem;
 using DataAccessLibrary.Models.Shatem.DataAccess;
 using DataAccessLibrary.ApiDataAccess;
 using System.Configuration;
+using DataAccessLibrary.Helpers;
 
 var ConfBuilder = new ConfigurationBuilder()
 .SetBasePath(Directory.GetCurrentDirectory()) //<--You would need to set the path
@@ -56,9 +57,19 @@ builder.Services.AddSingleton(configuration.GetSection("AutoTradeAccess").Get<Au
 
 //ShatemApi
 builder.Services.Configure<ShatemConfig>(configuration.GetSection("ShatemConfig"));
-
 builder.Services.AddScoped<IShatemDataService, ShatemDataService>();
 builder.Services.AddTransient<IShatemAccess, ShatemAccess>();
+
+
+//Redis
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = configuration.GetConnectionString("Redis");
+    options.InstanceName = "Safari";
+
+});
+builder.Services.AddSingleton<RedisHelper>(sp => new RedisHelper(configuration.GetConnectionString("Redis")));
+
 
 
 var app = builder.Build();

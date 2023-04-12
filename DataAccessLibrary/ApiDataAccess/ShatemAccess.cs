@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Distributed;
+using SuppliersBlazor.Extensions;
+using DataAccessLibrary.Helpers;
 
 namespace DataAccessLibrary.ApiDataAccess
 {
@@ -18,91 +21,85 @@ namespace DataAccessLibrary.ApiDataAccess
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ShatemConfig _shatemConfig;
+        private readonly IDistributedCache _cache;
+        private readonly RedisHelper _redisHelper;
 
-        public ShatemAccess(IOptions<ShatemConfig> shatemConfig, IConfiguration configuration, IHttpClientFactory httpClientFactory)
+        public ShatemAccess(IOptions<ShatemConfig> shatemConfig, IConfiguration configuration, IHttpClientFactory httpClientFactory, IDistributedCache cache, RedisHelper redisHelper)
         {
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _shatemConfig = shatemConfig.Value;
+            _cache = cache;
+            _redisHelper = redisHelper;
         }
 
         public async Task<ShatemAccessModel> GetAccessTokenAsync()
         {
-
+            string recordKey = "shatemToken_" + DateTime.Now.ToString("yyyyMMdd");
+            string loadLocation = "";
             string url = _shatemConfig.Uri;
             string apiKey = _shatemConfig.ApiKey;
 
-            var body = new Dictionary<string, string>
-    {
-        { "ApiKey", $"{apiKey}" }
-    };
-
-            var content = new FormUrlEncodedContent(body);
-
-            url = url + "/auth/loginbyapikey";
-
-            using (var _httpClient = _httpClientFactory.CreateClient())
+            if (_redisHelper.IsRedisServerAvailable())
             {
-                _httpClient.Timeout = TimeSpan.FromSeconds(30);
+                var shatemAccessModel = await _cache.GetRecordAsync<ShatemAccessModel>(recordKey);
 
-                try
+                if (shatemAccessModel is null)
                 {
-                    var response = await _httpClient.PostAsync(url, content);
-
-                    string rmessage = response.StatusCode.ToString();
-                    string rreason = response.ReasonPhrase;
-
-                    if (response.IsSuccessStatusCode)
+                    shatemAccessModel = await FetchAccessTokenFromServer(url, apiKey, recordKey);
+                    if (shatemAccessModel != null)
                     {
-                        var jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-
-                        var serializerOptions = new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        };
-
-                        var shatemAccessModel = JsonSerializer.Deserialize<ShatemAccessModel>(jsonResponse, serializerOptions);
-
                         return shatemAccessModel;
                     }
-
                 }
-                catch (Exception ex)
+                else
                 {
-                    await Console.Out.WriteLineAsync($"Error: {ex.Message}");
-                    return null;
+                    loadLocation = $"Loaded from the cache at {DateTime.Now}";
+                    return shatemAccessModel;
                 }
-
-
-
-                return null;
             }
+            else
+            {
+                var shatemAccessModel = await FetchAccessTokenFromServer(url, apiKey, recordKey);
+                return shatemAccessModel;
+            }
+
+            return null;
         }
 
         public async Task<List<ShatemAgreement>> GetAgreementsAsync(string accessToken)
         {
             string url = _shatemConfig.Uri;
+            string cacheKey = $"ShatemAgreements_"+ DateTime.Now.ToString("yyyyMM");
 
 
-            var request = new HttpRequestMessage(HttpMethod.Get, url + "/customer/agreements");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            // Try to get the result from cache
+            List<ShatemAgreement> shatemAgreements = await _cache.GetRecordAsync<List<ShatemAgreement>>(cacheKey);
 
-            using (var _httpClient = _httpClientFactory.CreateClient())
+            if (shatemAgreements == null)
             {
-                var response = await _httpClient.SendAsync(request);
+                var request = new HttpRequestMessage(HttpMethod.Get, url + "/customer/agreements");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-
-                var serializerOptions = new JsonSerializerOptions
+                using (var _httpClient = _httpClientFactory.CreateClient())
                 {
-                    PropertyNameCaseInsensitive = true
-                };
+                    var response = await _httpClient.SendAsync(request);
 
-                var shatemAgreements = JsonSerializer.Deserialize<List<ShatemAgreement>>(jsonResponse, serializerOptions);
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
 
-                return shatemAgreements;
+                    var serializerOptions = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+
+                    shatemAgreements = JsonSerializer.Deserialize<List<ShatemAgreement>>(jsonResponse, serializerOptions);
+
+                    // Store the result in cache for 24 hours
+                    await _cache.SetRecordAsync(cacheKey, shatemAgreements, TimeSpan.FromHours(24));
+                }
             }
+
+            return shatemAgreements;
         }
 
         public async Task<ShatemLocationList> GetLocationListAsync(string accessToken)
@@ -129,6 +126,64 @@ namespace DataAccessLibrary.ApiDataAccess
 
                 return shatemLocations;
             }
+        }
+
+
+        private async Task<ShatemAccessModel> FetchAccessTokenFromServer(string url, string apiKey, string recordKey)
+        {
+            var body = new Dictionary<string, string>
+    {
+        { "ApiKey", $"{apiKey}" }
+    };
+
+            var content = new FormUrlEncodedContent(body);
+
+            url = url + "/auth/loginbyapikey";
+
+            using (var _httpClient = _httpClientFactory.CreateClient())
+            {
+                _httpClient.Timeout = TimeSpan.FromSeconds(30);
+
+                try
+                {
+                    var response = await _httpClient.PostAsync(url, content);
+
+                    string rmessage = response.StatusCode.ToString();
+                    string rreason = response.ReasonPhrase;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                        var serializerOptions = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        };
+
+                        var shatemAccessModel = JsonSerializer.Deserialize<ShatemAccessModel>(jsonResponse, serializerOptions);
+
+                        try
+                        {
+                            await _cache.SetRecordAsync(recordKey, shatemAccessModel, TimeSpan.FromMinutes(55));
+                        }
+                        catch (Exception ex)
+                        {
+                            // Handle the exception, e.g., log the error or take appropriate action
+                            await Console.Out.WriteLineAsync($"Error storing data in Redis: {ex.Message}");
+                        }
+
+                        return shatemAccessModel;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    await Console.Out.WriteLineAsync($"Error: {ex.Message}");
+                }
+
+            }
+
+            return null;
         }
     }
 }

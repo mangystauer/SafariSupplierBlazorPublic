@@ -1,8 +1,11 @@
 ﻿using DataAccessLibrary.ApiDataAccess;
+using DataAccessLibrary.Helpers;
 using DataAccessLibrary.Models.Shatem.DataAccess;
 using DataAccessLibrary.Models.Shatem.Models;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using SuppliersBlazor.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -21,13 +24,18 @@ namespace DataAccessLibrary.DataService.Shatem
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IShatemAccess _shatemAccess;
         private readonly ShatemConfig _shatemConfig;
+        private readonly RedisHelper _redisHelper;
+        private readonly IDistributedCache _cache;
 
-        public ShatemDataService(IOptions<ShatemConfig> shatemConfig, IConfiguration configuration, IHttpClientFactory httpClientFactory, IShatemAccess shatemAccess)
+        public ShatemDataService(IOptions<ShatemConfig> shatemConfig, IConfiguration configuration, IHttpClientFactory httpClientFactory, IShatemAccess shatemAccess, RedisHelper redisHelper, IDistributedCache cache)
         {
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _shatemAccess = shatemAccess;
             _shatemConfig = shatemConfig.Value;
+            _redisHelper = redisHelper;
+            _cache = cache;
+
 
             //_apiKey = _configuration["ShatemApiKey"];
         }
@@ -35,29 +43,36 @@ namespace DataAccessLibrary.DataService.Shatem
 
         public async Task<List<ShatemFoundArticle>> SearchArticlesAsync(string lineToSearch, string tradeMarkName = null)
         {
-            //string url = _configuration["ShatemUri"];
-            //string apiKey = _configuration["ShatemApiKey"];
-
             string url = _shatemConfig.Uri;
             string apiKey = _shatemConfig.ApiKey;
 
             if (string.IsNullOrEmpty(tradeMarkName))
             {
-                url = url + $"/articles/search?searchString={lineToSearch}";
+                url += $"/articles/search?searchString={lineToSearch}";
             }
             else
             {
-                url = url + $"/articles/search?searchString={lineToSearch}&tradeMarkNames={tradeMarkName}";
+                url += $"/articles/search?searchString={lineToSearch}&tradeMarkNames={tradeMarkName}";
+
             }
+
             ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
-            string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
+            string token = shatemAccessModel?.access_token;
+
+            string recordKey = $"shatemPart_{lineToSearch.ToLower()}_" + DateTime.Now.ToString("yyyyMM");
+
+            if (_redisHelper.IsRedisServerAvailable())
+            {
+                var shatemSearchResults = await _cache.GetRecordAsync<List<ShatemFoundArticle>>(recordKey);
+
+                if (shatemSearchResults != null)
+                {
+                    return shatemSearchResults;
+                }
+            }
 
             using (var httpClient = _httpClientFactory.CreateClient())
             {
-
-
-
-
                 httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
                 try
@@ -68,7 +83,6 @@ namespace DataAccessLibrary.DataService.Shatem
                     {
                         string jsonResponse = await response.Content.ReadAsStringAsync();
 
-                        // Configure JsonSerializerOptions for case-insensitive property name handling
                         JsonSerializerOptions jsonOptions = new JsonSerializerOptions
                         {
                             PropertyNameCaseInsensitive = true
@@ -76,42 +90,35 @@ namespace DataAccessLibrary.DataService.Shatem
 
                         List<ShatemFoundArticleWrapper> foundArticleWrappers = JsonSerializer.Deserialize<List<ShatemFoundArticleWrapper>>(jsonResponse, jsonOptions);
 
-                        if (foundArticleWrappers != null && foundArticleWrappers.Count > 0)
+                        if (foundArticleWrappers?.Count > 0)
                         {
-                            // Extract the ShatemFoundArticle objects from the Article property of the wrapper class
                             List<ShatemFoundArticle> foundArticles = foundArticleWrappers.Select(a => a.Article).ToList();
+
+                            if (_redisHelper.IsRedisServerAvailable())
+                            {
+                                await _cache.SetRecordAsync(recordKey, foundArticles, TimeSpan.FromHours(24));
+                            }
+
                             return foundArticles;
-                        }
-                        else
-                        {
-                            return null;
                         }
                     }
                     else
                     {
-                        return null;
+                        Console.WriteLine($"Произошла ошибка при запросе. {response.ReasonPhrase}");
                     }
                 }
-                catch (HttpRequestException ex)
+                catch (Exception ex) when (ex is HttpRequestException || ex is JsonException)
                 {
-                    Console.WriteLine($"Произошла ошибка при запросе. {ex.Message}");
-                    // Handle web-related error
-                    return null;
-                }
-                catch (JsonException ex)
-                {
-                    Console.WriteLine($"Произошла ошибка при десериализации JSON. {ex.Message}");
-                    // Handle JSON-related error
-                    return null;
+                    Console.WriteLine($"Произошла ошибка. {ex.Message}");
                 }
             }
+
+            return null;
         }
 
 
         public async Task<ShatemFoundArticle> ArticleInfoAsync(string articleId, bool includeAnalogs = false)
         {
-            //string url = _configuration["ShatemUri"];
-
             string url = _shatemConfig.Uri;
             string apiKey = _shatemConfig.ApiKey;
 
@@ -121,8 +128,28 @@ namespace DataAccessLibrary.DataService.Shatem
             {
                 url += "?analogs=true";
             }
+
             ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
             string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
+
+
+            ShatemFoundArticle foundArticle = new ShatemFoundArticle();
+
+            string cacheKey = $"ShatemArticleInfo_{DateTime.Now.ToString("yyyyMM")}_{articleId}_{includeAnalogs}";
+
+            if (_redisHelper.IsRedisServerAvailable())
+            {
+                // Try to get the result from cache
+
+
+                foundArticle = await _cache.GetRecordAsync<ShatemFoundArticle>(cacheKey);
+
+                if (foundArticle != null)
+                {
+                    // Return cached result if available
+                    return foundArticle;
+                }
+            }
 
             using (var _httpClient = _httpClientFactory.CreateClient())
             {
@@ -148,48 +175,55 @@ namespace DataAccessLibrary.DataService.Shatem
 
                             if (foundArticleWrapper != null && foundArticleWrapper.Article != null)
                             {
-                                return foundArticleWrapper.Article;
+                                foundArticle = foundArticleWrapper.Article;
+
+                                // Store the result in cache for future use
+                                await _cache.SetRecordAsync(cacheKey, foundArticle, TimeSpan.FromHours(24));
+
+                                return foundArticle;
                             }
-                            else
-                            {
-                                return null;
-                            }
-                        }
-                        else
-                        {
-                            return null;
                         }
                     }
                     else
                     {
                         Console.WriteLine($"Произошла ошибка при запросе. Код ошибки: {response.StatusCode}");
-                        return null;
                     }
                 }
                 catch (System.Net.Http.HttpRequestException ex)
                 {
                     Console.WriteLine($"Произошла ошибка при выполнении HTTP-запроса. {ex.Message}");
-                    return null;
                 }
                 catch (System.Text.Json.JsonException ex)
                 {
                     Console.WriteLine($"Произошла ошибка при десериализации JSON. {ex.Message}");
-                    return null;
                 }
             }
+
+            return null;
         }
 
 
 
         public async Task<ShatemFullArticle> FullArticleInfoAsync(int articleId)
         {
-            //string url = _configuration["ShatemUri"];
-
             string url = _shatemConfig.Uri;
             string apiKey = _shatemConfig.ApiKey;
+            string cacheKey = $"ShatemFullArticle_{articleId}";
+
+            // Check if Redis server is available
+            if (_redisHelper.IsRedisServerAvailable())
+            {
+                // Try to get the result from cache
+                ShatemFullArticle shatemFullArticle = await _cache.GetRecordAsync<ShatemFullArticle>(cacheKey);
+
+                if (shatemFullArticle != null)
+                {
+                    return shatemFullArticle;
+                }
+            }
 
             url = $"{url}/articles/{articleId}?include=trademark,contents,extended_info"; // Update URL to include query parameters
-            
+
             ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
             string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
 
@@ -216,16 +250,13 @@ namespace DataAccessLibrary.DataService.Shatem
 
                         if (shatemFullArticle != null)
                         {
+                            // Store the result in cache if Redis server is available
+                            if (_redisHelper.IsRedisServerAvailable())
+                            {
+                                await _cache.SetRecordAsync(cacheKey, shatemFullArticle);
+                            }
                             return shatemFullArticle;
                         }
-                        else
-                        {
-                            return null;
-                        }
-                    }
-                    else
-                    {
-                        return null;
                     }
                 }
                 catch (HttpRequestException ex)
@@ -239,28 +270,38 @@ namespace DataAccessLibrary.DataService.Shatem
                     return null;
                 }
             }
+
+            return null;
         }
 
 
         public async Task<List<ShatemArticlePrice>> SearchAvailableQuantityAsync(string articleId, bool includeAnalogs = false)
         {
-
             string url = _shatemConfig.Uri;
             string apiKey = _shatemConfig.ApiKey;
-
-
-
-
 
             ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
             string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
 
             List<ShatemAgreement> shatemAgreements = await _shatemAccess.GetAgreementsAsync(token);
-
-            string agreementCode = shatemAgreements.FirstOrDefault().code;
-
+            string agreementCode = shatemAgreements.FirstOrDefault()?.code; // Use null conditional operator to prevent NullReferenceException
 
             url = $"{url}/prices/search?agreementCode={agreementCode}";
+
+            string cacheKey = $"ShatemPrices_{articleId}_{includeAnalogs}"; // Generate a unique cache key based on articleId and includeAnalogs
+
+
+            // Check if Redis server is available
+            if (_redisHelper.IsRedisServerAvailable())
+            {
+                // Try to get the result from cache
+                List<ShatemArticlePrice> cachedResults = await _cache.GetRecordAsync<List<ShatemArticlePrice>>(cacheKey);
+
+                if (cachedResults != null)
+                {
+                    return cachedResults;
+                }
+            }
 
             using (var _httpClient = _httpClientFactory.CreateClient())
             {
@@ -287,6 +328,12 @@ namespace DataAccessLibrary.DataService.Shatem
 
                     List<ShatemArticlePrice> foundQty = JsonSerializer.Deserialize<List<ShatemArticlePrice>>(jsonResponse, jsonOptions);
 
+                    // Store the result in cache if Redis server is available
+                    if (_redisHelper.IsRedisServerAvailable())
+                    {
+                        await _cache.SetRecordAsync(cacheKey, foundQty, TimeSpan.FromMinutes(15)); // Cache the results for 15 minutes
+                    }
+
                     return foundQty;
                 }
                 catch (HttpRequestException ex)
@@ -301,11 +348,12 @@ namespace DataAccessLibrary.DataService.Shatem
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Exception: {ex.Message}");
+                    Console.WriteLine($"Ошибка: {ex.Message}");
                     return null;
                 }
             }
         }
+
 
         public async Task<List<string>> SearchContentsAsync(string contentId, int heightSize = 400, int widthSize = 400)
         {
@@ -315,6 +363,8 @@ namespace DataAccessLibrary.DataService.Shatem
 
 
             url = url + "/contents/search";
+
+
 
             ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
             string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
@@ -391,4 +441,5 @@ namespace DataAccessLibrary.DataService.Shatem
     }
 
 }
+    
 

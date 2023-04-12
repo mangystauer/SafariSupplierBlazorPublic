@@ -23,5 +23,6 @@ namespace DataAccessLibrary.Models.Shatem.Models
         public string UnitOfMeasure { get; set; }
         public int?  AvailableQty { get; set; }
         public decimal? Price { get; set; }
+        public string? stock { get; set; }
     }
 }
