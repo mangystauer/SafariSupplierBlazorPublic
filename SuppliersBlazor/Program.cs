@@ -14,14 +14,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using SuppliersBlazor.Areas.Identity;
-
+using DataAccessLibrary.Models;
 
 var ConfBuilder = new ConfigurationBuilder()
 .SetBasePath(Directory.GetCurrentDirectory()) //<--You would need to set the path
 .AddJsonFile("appsettings.json"); //or what ever file you have the settings
 
 IConfiguration configuration = ConfBuilder.Build();
-
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,7 +46,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuth
 
 builder.Services.AddTransient<IDataAccess, MySQLDataAccess>();
 builder.Services.AddTransient<ICrud, MySqlCrud>();
-
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton(configuration.GetSection("AutoTradeAccess").Get<AutoTradeAccess>());
 
 
 var app = builder.Build();

@@ -1,0 +1,99 @@
+﻿@using System.Text;
+@using System.Text.Json;
+@using System.IO
+@using System.Net
+@using Google.Apis.Requests;
+@using Google.Apis.Util;
+@using Microsoft.Extensions.Options;
+@using System.Net.Http.Headers;
+@inject IHttpClientFactory _httpClientFactory
+@inject AutoTradeAccess _autoTradeAccess
+
+@page "/autotradequery"
+
+<h3>AutoTradeQuery</h3>
+
+@code {
+
+
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        string result = await MakeApiCallAsync();
+    }
+
+
+        public async Task<string> MakeApiCallAsync()
+        {
+            string postBody = "{\"auth_key\":\"613c2c445caf04703e94f44f46de0dfd\",\"method\":\"getStoragesList\"}";
+            StringContent content = new StringContent($"data={postBody}", Encoding.UTF8, "application/x-www-form-urlencoded");
+
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36");
+
+            try
+            {
+                var response = await client.PostAsync("https://api2.autotrade.su/?json", content);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+    }
+
+
+
+
+    //private async Task GetgetStocksAndPrices()
+    //{
+    //    string auth_key = _autoTradeAccess.AutoTradeKey;
+    //    string uri = _autoTradeAccess.AutoTradeUri;
+
+    //    string method = "getStocksAndPrices";
+
+
+
+
+
+    //    var _client = _httpClientFactory.CreateClient();
+
+
+    //        public async Taskstring MakeApiCallAsync() {
+    //    string postBody = "{\"auth_key\":\"29a4729eef37cebdd4413eb4cf55c64b\",\"method\":\"getStoragesList\"}";
+    //    StringContent content = new StringContent($"data={postBody}", Encoding.UTF8, "application/x-www-form-urlencoded");
+
+    //    var client = httpClientFactory.CreateClient();
+    //    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36");
+
+    //    try {
+    //        var response = await client.PostAsync("https://api2.autotrade.su/?json", content);
+    //        response.EnsureSuccessStatusCode();
+    //        return await response.Content.ReadAsStringAsync();
+    //    } catch (HttpRequestException ex) {
+    //        Console.WriteLine(ex.Message);
+    //        return null;
+    //    }
+
+
+    //    //    var client = new WebClient();
+    //    //var postBody = "{\"auth_key\":\"613c2c445caf04703e94f44f46de0dfd\",\"method\":\"getStoragesList\"}";
+    //    //    var formEncoded = new ASCIIEncoding().GetBytes("data=" + postBody);
+    //    //    client.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36");
+
+    //    //    try
+    //    //    {
+    //    //        var response = client.UploadData("https://api2.autotrade.su/?json", "POST", formEncoded);
+    //    //        Console.WriteLine(Encoding.ASCII.GetString(response));
+    //    //    }
+    //    //    catch (WebException e)
+    //    //    {
+    //    //        Console.WriteLine(e.ToString());
+    //    //    }
+    //    }
