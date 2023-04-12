@@ -1,6 +1,8 @@
-﻿using DataAccessLibrary.Models.Shatem.DataAccess;
+﻿using DataAccessLibrary.ApiDataAccess;
+using DataAccessLibrary.Models.Shatem.DataAccess;
 using DataAccessLibrary.Models.Shatem.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -13,27 +15,31 @@ using System.Threading.Tasks;
 
 namespace DataAccessLibrary.DataService.Shatem
 {
-    public class ShatemDataService
+    public class ShatemDataService : IShatemDataService
     {
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IShatemAccess _shatemAccess;
-        private readonly string? _apiKey;
+        private readonly ShatemConfig _shatemConfig;
 
-        public ShatemDataService(IConfiguration configuration, IHttpClientFactory httpClientFactory, IShatemAccess shatemAccess)
+        public ShatemDataService(IOptions<ShatemConfig> shatemConfig, IConfiguration configuration, IHttpClientFactory httpClientFactory, IShatemAccess shatemAccess)
         {
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _shatemAccess = shatemAccess;
+            _shatemConfig = shatemConfig.Value;
 
-            _apiKey = _configuration["ShatemApiKey"];
+            //_apiKey = _configuration["ShatemApiKey"];
         }
-
 
 
         public async Task<List<ShatemFoundArticle>> SearchArticlesAsync(string lineToSearch, string tradeMarkName = null)
         {
-            string url = _configuration["ShatemUri"];
+            //string url = _configuration["ShatemUri"];
+            //string apiKey = _configuration["ShatemApiKey"];
+
+            string url = _shatemConfig.Uri;
+            string apiKey = _shatemConfig.ApiKey;
 
             if (string.IsNullOrEmpty(tradeMarkName))
             {
@@ -43,8 +49,8 @@ namespace DataAccessLibrary.DataService.Shatem
             {
                 url = url + $"/articles/search?searchString={lineToSearch}&tradeMarkNames={tradeMarkName}";
             }
-
-            string token = _shatemAccess.GetAccessTokenAsync(_apiKey).Result.access_token;
+            ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
+            string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
 
             using (var httpClient = _httpClientFactory.CreateClient())
             {
@@ -52,7 +58,7 @@ namespace DataAccessLibrary.DataService.Shatem
 
 
 
-                    httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
                 try
                 {
@@ -102,11 +108,12 @@ namespace DataAccessLibrary.DataService.Shatem
         }
 
 
-
-
         public async Task<ShatemFoundArticle> ArticleInfoAsync(string articleId, bool includeAnalogs = false)
         {
-            string url = _configuration["ShatemUri"];
+            //string url = _configuration["ShatemUri"];
+
+            string url = _shatemConfig.Uri;
+            string apiKey = _shatemConfig.ApiKey;
 
             url = url + $"/articles/{articleId}";
 
@@ -114,7 +121,9 @@ namespace DataAccessLibrary.DataService.Shatem
             {
                 url += "?analogs=true";
             }
-            string token = _shatemAccess.GetAccessTokenAsync(_apiKey).Result.access_token;
+            ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
+            string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
+
             using (var _httpClient = _httpClientFactory.CreateClient())
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
@@ -174,10 +183,16 @@ namespace DataAccessLibrary.DataService.Shatem
 
         public async Task<ShatemFullArticle> FullArticleInfoAsync(int articleId)
         {
-            string url = _configuration["ShatemUri"];
+            //string url = _configuration["ShatemUri"];
+
+            string url = _shatemConfig.Uri;
+            string apiKey = _shatemConfig.ApiKey;
 
             url = $"{url}/articles/{articleId}?include=trademark,contents,extended_info"; // Update URL to include query parameters
-            string token = _shatemAccess.GetAccessTokenAsync(_apiKey).Result.access_token;
+            
+            ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
+            string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
+
             using (var _httpClient = _httpClientFactory.CreateClient())
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
@@ -227,14 +242,25 @@ namespace DataAccessLibrary.DataService.Shatem
         }
 
 
-
-
-
-        public async Task<List<ShatemArticlePrice>> SearchAvailableQuantityAsync(string articleId, string uriShatem, string agreementCode, bool includeAnalogs = false)
+        public async Task<List<ShatemArticlePrice>> SearchAvailableQuantityAsync(string articleId, bool includeAnalogs = false)
         {
-            string url = $"{uriShatem}/prices/search?agreementCode={agreementCode}";
 
-            string token = _shatemAccess.GetAccessTokenAsync(_apiKey).Result.access_token;
+            string url = _shatemConfig.Uri;
+            string apiKey = _shatemConfig.ApiKey;
+
+
+
+
+
+            ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
+            string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
+
+            List<ShatemAgreement> shatemAgreements = await _shatemAccess.GetAgreementsAsync(token);
+
+            string agreementCode = shatemAgreements.FirstOrDefault().code;
+
+
+            url = $"{url}/prices/search?agreementCode={agreementCode}";
 
             using (var _httpClient = _httpClientFactory.CreateClient())
             {
@@ -283,9 +309,15 @@ namespace DataAccessLibrary.DataService.Shatem
 
         public async Task<List<string>> SearchContentsAsync(string contentId, int heightSize = 400, int widthSize = 400)
         {
-            string url = _configuration["ShatemUri"] + "/contents/search";
 
-            string token = _shatemAccess.GetAccessTokenAsync(_apiKey).Result.access_token;
+            string url = _shatemConfig.Uri;
+            string apiKey = _shatemConfig.ApiKey;
+
+
+            url = url + "/contents/search";
+
+            ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
+            string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
 
             using (var _httpClient = _httpClientFactory.CreateClient())
             {

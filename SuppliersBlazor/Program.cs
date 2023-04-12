@@ -15,6 +15,10 @@ using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using SuppliersBlazor.Areas.Identity;
 using DataAccessLibrary.Models;
+using DataAccessLibrary.DataService.Shatem;
+using DataAccessLibrary.Models.Shatem.DataAccess;
+using DataAccessLibrary.ApiDataAccess;
+using System.Configuration;
 
 var ConfBuilder = new ConfigurationBuilder()
 .SetBasePath(Directory.GetCurrentDirectory()) //<--You would need to set the path
@@ -48,6 +52,13 @@ builder.Services.AddTransient<IDataAccess, MySQLDataAccess>();
 builder.Services.AddTransient<ICrud, MySqlCrud>();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton(configuration.GetSection("AutoTradeAccess").Get<AutoTradeAccess>());
+
+
+//ShatemApi
+builder.Services.Configure<ShatemConfig>(configuration.GetSection("ShatemConfig"));
+
+builder.Services.AddScoped<IShatemDataService, ShatemDataService>();
+builder.Services.AddTransient<IShatemAccess, ShatemAccess>();
 
 
 var app = builder.Build();

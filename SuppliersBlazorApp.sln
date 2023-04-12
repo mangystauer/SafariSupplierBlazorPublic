@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MySqlSuppliersConsole", "My
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoTradeApiCallsConsole", "AutoTradeApiCallsConsole\AutoTradeApiCallsConsole.csproj", "{1A517BE5-110A-49DB-AAA1-6B0874E9BA7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShatemApiClient", "ShatemApiClient\ShatemApiClient.csproj", "{CB4A8EB3-6B0B-493C-923F-0C4627E1CD51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShatemApiClient", "ShatemApiClient\ShatemApiClient.csproj", "{CB4A8EB3-6B0B-493C-923F-0C4627E1CD51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

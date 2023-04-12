@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.Extensions.Options;
 
 namespace DataAccessLibrary.ApiDataAccess
 {
@@ -16,15 +17,20 @@ namespace DataAccessLibrary.ApiDataAccess
     {
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ShatemConfig _shatemConfig;
 
-        public ShatemAccess(IConfiguration configuration, IHttpClientFactory httpClientFactory)
+        public ShatemAccess(IOptions<ShatemConfig> shatemConfig, IConfiguration configuration, IHttpClientFactory httpClientFactory)
         {
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
+            _shatemConfig = shatemConfig.Value;
         }
 
-        public async Task<ShatemAccessModel> GetAccessTokenAsync(string apiKey)
+        public async Task<ShatemAccessModel> GetAccessTokenAsync()
         {
+
+            string url = _shatemConfig.Uri;
+            string apiKey = _shatemConfig.ApiKey;
 
             var body = new Dictionary<string, string>
     {
@@ -33,28 +39,53 @@ namespace DataAccessLibrary.ApiDataAccess
 
             var content = new FormUrlEncodedContent(body);
 
+            url = url + "/auth/loginbyapikey";
+
             using (var _httpClient = _httpClientFactory.CreateClient())
             {
+                _httpClient.Timeout = TimeSpan.FromSeconds(30);
 
-                var response = await _httpClient.PostAsync(_configuration["ShatemUri"] + "/auth/loginbyapikey", content);
-
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-
-                var serializerOptions = new JsonSerializerOptions
+                try
                 {
-                    PropertyNameCaseInsensitive = true
-                };
+                    var response = await _httpClient.PostAsync(url, content);
 
-                var shatemAccessModel = JsonSerializer.Deserialize<ShatemAccessModel>(jsonResponse, serializerOptions);
+                    string rmessage = response.StatusCode.ToString();
+                    string rreason = response.ReasonPhrase;
 
-                return shatemAccessModel;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+
+                        var serializerOptions = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        };
+
+                        var shatemAccessModel = JsonSerializer.Deserialize<ShatemAccessModel>(jsonResponse, serializerOptions);
+
+                        return shatemAccessModel;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    await Console.Out.WriteLineAsync($"Error: {ex.Message}");
+                    return null;
+                }
+
+
+
+                return null;
             }
         }
 
         public async Task<List<ShatemAgreement>> GetAgreementsAsync(string accessToken)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, _configuration["ShatemUri"] + "/customer/agreements");
+            string url = _shatemConfig.Uri;
+
+
+            var request = new HttpRequestMessage(HttpMethod.Get, url + "/customer/agreements");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using (var _httpClient = _httpClientFactory.CreateClient())
@@ -76,7 +107,10 @@ namespace DataAccessLibrary.ApiDataAccess
 
         public async Task<ShatemLocationList> GetLocationListAsync(string accessToken)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, _configuration["ShatemUri"] + "/locations");
+
+            string url = _shatemConfig.Uri;
+
+            var request = new HttpRequestMessage(HttpMethod.Get, url + "/locations");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using (var _httpClient = _httpClientFactory.CreateClient())

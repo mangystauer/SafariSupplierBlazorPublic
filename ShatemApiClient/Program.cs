@@ -39,7 +39,7 @@ var _shatemAccess = serviceProvider.GetService<IShatemAccess>();
 var _shatemDataService = serviceProvider.GetService<ShatemDataService>();
 
 
-shatemAccessDetails = await _shatemAccess.GetAccessTokenAsync(apiKey);
+shatemAccessDetails = await _shatemAccess.GetAccessTokenAsync();
 
 
 await Console.Out.WriteLineAsync($"The access token is {shatemAccessDetails.access_token}. Token type:{shatemAccessDetails.token_type}. Expires in {shatemAccessDetails.expires_in}. Refresh token: {shatemAccessDetails.refresh_token} ");
@@ -87,7 +87,7 @@ if (!string.IsNullOrEmpty(lineToSearch))
 
 if (articleFoundId > 0)
 {
-    List<ShatemArticlePrice> shatemArticlePrices = await _shatemDataService.SearchAvailableQuantityAsync(articleFoundId.ToString(), uriShatem, agreementCode, true);
+    List<ShatemArticlePrice> shatemArticlePrices = await _shatemDataService.SearchAvailableQuantityAsync(articleFoundId.ToString(), true);
 
 
 

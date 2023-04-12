@@ -1,0 +1,96 @@
+﻿@page "/full-parts-search"
+
+@using DataAccessLibrary.DataService.Shatem;
+@using DataAccessLibrary.Models.Shatem.DataAccess;
+@using DataAccessLibrary.Models.Shatem.Models;
+@using Models.Search_Models;
+@inject IShatemAccess ShatemAccess;
+@inject IShatemDataService ShatemDataService
+
+<h3>ShatemPartsSearch</h3>
+
+<h3>Parts Search</h3>
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="form-group">
+            <label for="partNumber">Part Number</label>
+            <input type="text" class="form-control" @bind="@searchModel.PartNumber" id="partNumber" />
+        </div>
+
+        <div class="form-group">
+            <label for="tradeMarkName">Trademark Name</label>
+            <input type="text" class="form-control" @bind="@searchModel.TradeMarkName" id="tradeMarkName" />
+        </div>
+
+        <button class="btn btn-primary" @onclick="SearchParts">Search</button>
+    </div>
+
+    <div class="col-md-6">
+        @if (parts != null && parts.Count > 0)
+        {
+            <h4>Search Results</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Партномер</th>
+                        <th>Производитель</th>
+                        <th>Название</th>
+                        <th>Описание</th>
+                        <th>Единица</th>
+                        <th>Доступное количество</th> <!-- Added column for available quantity -->
+                        <!-- Add more columns as needed -->
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var part in parts)
+                    {
+                        <tr>
+                            <td>@part.Id</td>
+                            <td>@part.Code</td>
+                            <td>@part.TradeMarkName</td>
+                            <td>@part.Name</td>
+                            <td>@part.Description</td>
+                            <td>@part.UnitOfMeasure</td>
+@*                            <td>@part.AvailableQuantity</td> <!-- Display available quantity -->*@
+                            <!-- Display more data as needed -->
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else if (searching)
+        {
+            <p>Loading...</p>
+        }
+        else
+        {
+            <p>No results found.</p>
+        }
+    </div>
+</div>
+
+@code {
+    private ShatemPartsSearchModel searchModel = new ShatemPartsSearchModel();
+    private List<ShatemFoundArticle> parts;
+    private bool searching;
+
+    private async Task SearchParts()
+    {
+        searching = true;
+        parts = await ShatemDataService.SearchArticlesAsync(searchModel.PartNumber, searchModel.TradeMarkName);
+        searching = false;
+
+        // Loop through the search results and get available quantities for each part
+        //foreach (var part in parts)
+        //{
+        //    var articlePrices = await ShatemDataService.SearchAvailableQuantityAsync(part.Id); // Call SearchAvailableQuantityAsync with part.Id
+        //    var availableQuantity = articlePrices?.Sum(p => p.quantity?.available) ?? 0; // Calculate total available quantity from the article prices
+
+        //    // Output the available quantity for the current part
+        //    Console.WriteLine($"Part ID: {part.Id}, Available Quantity: {availableQuantity}");
+        //    part.AvailableQuantity = availableQuantity; // Set the available quantity for the part
+        //}
+    }
+}

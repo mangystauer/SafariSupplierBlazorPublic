@@ -10,7 +10,7 @@ namespace DataAccessLibrary.Models.Shatem.DataAccess
 {
     public interface IShatemAccess
     {
-        Task<ShatemAccessModel> GetAccessTokenAsync(string apiKey);
+        Task<ShatemAccessModel> GetAccessTokenAsync();
 
         Task<List<ShatemAgreement>> GetAgreementsAsync(string accessToken);
 
