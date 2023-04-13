@@ -72,9 +72,20 @@ namespace DataAccessLibrary.ApiDataAccess
             string url = _shatemConfig.Uri;
             string cacheKey = $"ShatemAgreements_"+ DateTime.Now.ToString("yyyyMM");
 
+            List<ShatemAgreement> shatemAgreements = new List<ShatemAgreement>();
 
-            // Try to get the result from cache
-            List<ShatemAgreement> shatemAgreements = await _cache.GetRecordAsync<List<ShatemAgreement>>(cacheKey);
+            if (_redisHelper.IsRedisServerAvailable())
+            {
+                // Try to get the result from cache
+                shatemAgreements = await _cache.GetRecordAsync<List<ShatemAgreement>>(cacheKey);
+
+
+                    if (shatemAgreements != null)
+                    {
+                        return shatemAgreements;
+                    }
+                    
+            }
 
             if (shatemAgreements == null)
             {

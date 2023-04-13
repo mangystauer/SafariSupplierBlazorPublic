@@ -1,0 +1,109 @@
+﻿@using DataAccessLibrary.Models.Shatem.Models;
+@inherits ComponentBase
+
+@using DataAccessLibrary.DataService.Shatem;
+@using DataAccessLibrary.Models.Shatem.DataAccess;
+@using DataAccessLibrary.Models.Shatem.Models;
+@using Models.Search_Models;
+@inject IShatemAccess ShatemAccess;
+@inject IShatemDataService _shatemDataService
+@inject IJSRuntime JSRuntime
+
+
+<!-- Image Gallery -->
+<div class="container">
+    <div class="row">
+        @if (loading)
+        {
+            <div class="col-md-12">
+                <p>Loading...</p>
+            </div>
+        }
+        else if (error)
+        {
+            <div class="col-md-12">
+                <p>Error: @errorMessage</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var contentImage in contentImages)
+            {
+                <div class="col-md-8">
+                    <div class="thumbnail">
+                        <img src="@($"data:image/jpeg;base64,{Convert.ToBase64String(contentImage.Value)}")" alt="Image"
+                             width="@HeightSize" height="@WidthSize" class="img-thumbnail"
+                     @onclick="(() => ShowImageModal(contentImage.Value))"
+                             style="cursor: pointer;" />
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Изображение</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img src="" alt="Image" id="modalImage" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+
+
+    // Component parameters
+    [Parameter] public string ContentId { get; set; }
+    [Parameter] public int HeightSize { get; set; } = 400;
+    [Parameter] public int WidthSize { get; set; } = 400;
+
+    // Component state
+    private bool loading = true;
+    private bool error = false;
+    private string errorMessage = string.Empty;
+    private List<ContentImage> contentImages = new List<ContentImage>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Call the SearchContentsAsync method to fetch content images
+            contentImages = await _shatemDataService.SearchContentsAsync(ContentId, HeightSize, WidthSize);
+        }
+        catch (Exception ex)
+        {
+            error = true;
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+
+
+
+    private async Task ShowImageModal(byte[] imageBytes)
+    {
+
+        var base64Image = Convert.ToBase64String(imageBytes);
+        var imageSource = $"data:image/jpeg;base64,{base64Image}";
+        await JSRuntime.InvokeVoidAsync("showImageModal", imageSource);
+    }
+   
+
+
+}

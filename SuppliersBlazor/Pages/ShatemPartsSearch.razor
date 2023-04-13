@@ -11,24 +11,40 @@
 
 <h3>Поиск по партномеру</h3>
 
-<h3>Поиск</h3>
+
 
 <div class="row">
-    <div class="col-md-2">
-        <div class="form-group">
-            <label for="partNumber">Парт номер</label>
-            <input type="text" class="form-control" @bind="@searchModel.PartNumber" id="partNumber" />
-        </div>
+    <div class="col-md-2 card">
+    <EditForm Model="@searchModel" OnValidSubmit="@SearchParts">
+        <DataAnnotationsValidator />
+        <div class="col-md-12 card-body">
+            <div class="form-group col-md-12">
+                <label for="partNumber">Партномер</label>
+                <InputText class="form-control" @bind-Value="@searchModel.PartNumber" id="partNumber" />
+                <ValidationMessage For="@(() => searchModel.PartNumber)" />
+            </div>
+                <br />
+                <div class="form-group col-md-12">
+                <label for="tradeMarkName">Бренд</label>
+                <InputText class="form-control" @bind-Value="@searchModel.TradeMarkName" id="tradeMarkName" />
+                <ValidationMessage For="@(() => searchModel.TradeMarkName)" />
+            </div>
+            <br />
 
-        <div class="form-group">
-            <label for="tradeMarkName">Бренд</label>
-            <input type="text" class="form-control" @bind="@searchModel.TradeMarkName" id="tradeMarkName" />
+                <div class="form-group form-inline row col-md-12">
+                    <div class="col-md-8">
+                        <label for="includeAnalogs">Искать аналоги</label>
+                    </div>
+                    <div class="col-md-4">
+                        <InputCheckbox class="form-check ml-2" @bind-Value="@searchModel.IncludeAnalogs" id="includeAnalogs" />
+                    </div>
+                </div>
+                <br />
+            <button class="btn btn-primary" type="submit">Поиск</button>
         </div>
-
-        <button class="btn btn-primary" @onclick="SearchParts">Поиск</button>
+    </EditForm>
     </div>
-
-    <div class="col-md-6">
+    <div class="col-md-10">
         @if (parts != null && parts.Count > 0)
         {
             <h4>Результаты поиска</h4>
@@ -36,8 +52,8 @@
                 <thead>
                     <tr>
                         <th>Id</th>
-                        <th>Партномер</th>
                         <th>Производитель</th>
+                        <th>Партномер</th>
                         <th>Название</th>
                         <th>Описание</th>
                         <th>Единица</th>
@@ -52,9 +68,9 @@
                     {
                         <tr>
                             <td>@part.Id</td>
-                            <td>@part.Code</td>
                             <td>@part.TradeMarkName</td>
-                            <td>@part.Name</td>
+                            <td><a href="@($"/article-details/{part.Id}")">@part.Code</a></td>
+                            <td><a href="@($"/article-details/{part.Id}")">@part.Name</a></td>
                             <td>@part.Description</td>
                             <td>@part.UnitOfMeasure</td>
                             <td>@part.AvailableQty</td>
@@ -68,7 +84,11 @@
         }
         else if (searching)
         {
-            <p>Загрузка...</p>
+
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+
         }
         else
         {
@@ -77,51 +97,3 @@
     </div>
 </div>
 
-@code {
-    private ShatemPartsSearchModel searchModel = new ShatemPartsSearchModel();
-    private List<ShatemFoundArticle> parts;
-    private List<ShatemArticlePrice> availableParts;
-
-    private bool searching;
-
-    private async Task SearchParts()
-    {
-        searching = true;
-        parts = await ShatemDataService.SearchArticlesAsync(searchModel.PartNumber, searchModel.TradeMarkName);
-
-
-        if (parts is not null)
-        {
-            string searchPart = parts.FirstOrDefault().Id.ToString();
-
-            List<ShatemArticlePrice> availableQtyParts = await ShatemDataService.SearchAvailableQuantityAsync(searchPart, true);
-
-            if (availableQtyParts is not null)
-            {
-                availableParts = availableQtyParts;
-
-                foreach (var part in availableParts)
-                {
-                    ShatemFoundArticle shf = new();
-
-                    shf = await ShatemDataService.ArticleInfoAsync(part.articleId.ToString());
-
-                    shf.AvailableQty = part.quantity.available;
-                    shf.Price = part.price.value;
-                    shf.stock = part.locationCodeReal;
-
-                    parts.Add(shf);
-
-                }
-
-                parts.Remove(parts[0]);
-
-            }
-
-        }
-
-
-
-        searching = false;
-    }
-}

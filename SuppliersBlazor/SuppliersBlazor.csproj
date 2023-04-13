@@ -27,4 +27,8 @@
     <ProjectReference Include="..\DataAccessLibrary\DataAccessLibrary.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Shatem\" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,282 @@
+﻿@page "/article-details/{articleId:int}"
+@using DataAccessLibrary.DataService.Shatem;
+@using DataAccessLibrary.Models.Shatem.DataAccess;
+@using DataAccessLibrary.Models.Shatem.Models;
+@inject IShatemAccess ShatemAccess;
+@inject IShatemDataService shatemDataService
+
+
+
+@if (article != null)
+{
+    
+
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-1"></div> <!-- Empty column on the left -->
+            <div class="col-md-8">
+                @if (article != null)
+                {
+                    <h1>@article.article.code - @article.article.name</h1>
+                    <p>@article.article.description</p>
+                    <p>Единица измерения: @article.article.unitOfMeasure</p>
+                    <div style="display: flex; align-items: stretch; ">
+                        <!-- Table Div -->
+                        <div style="flex: 1; padding: 10px;">
+                            <div class="card">
+                                <div class="card-body">
+                                    <table class="table table-striped" style="width: 100%;">
+                                        <tr>
+                                            <td style="border: none;">Бренд</td>
+                                            <td style="border: none;">@article.tradeMark.name</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border: none;">Страна</td>
+                                            <td style="border: none;">@article.tradeMark.country</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border: none;">Веб-сайт</td>
+                                            <td style="border: none;">@article.tradeMark.url</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Logo Div -->
+                        <div style="flex: 1; padding: 10px;">
+                            @if (logoImage is not null)
+                            {
+                                <div>
+                                    <img src="@logoImage" alt="Brand Logo" class="rounded mx-auto d-block" style="width: 50%; height: 50%; object-fit: contain;">
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <!-- Display other properties of ShatemFullArticle as needed -->
+                @if (article.extendedInfo != null)
+                {
+                    @*                    <h4>Дополнительная информация:</h4>
+            <div class="card">
+            <div class="card-body">
+            <table class="table table-striped">
+            <tr>
+            <td>@article.extendedInfo.extendedDescription</td>
+            </tr>
+            </table>
+            </div>
+            </div>
+            <br />*@
+
+                    @if (article.contents.Count() > 0)
+                    {
+                        <br />
+                        <div class="row">
+
+
+                            <div class="col-md-12">
+                                <div class="card">
+
+                                    <h4>Изображения</h4>
+                                    @foreach (var content in article.contents)
+                                    {
+                                        <div class="card-body">
+                                            <tr>
+                                                <ShatemImageGallery ContentId="@content.contentId" HeightSize="400" WidthSize="400" />
+                                            </tr>
+                                        </div>
+                                    }
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                    }
+
+
+
+                    @if (article.extendedInfo.characteristics != null)
+                    {
+                        <h4>Характеристики:</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                <table class="table table-striped">
+                                    <tr>
+                                        <th>Название</th>
+                                        <th>Значение</th>
+                                    </tr>
+                                    @foreach (var characteristic in article.extendedInfo.characteristics)
+                                    {
+                                        <tr>
+                                            <td>@characteristic.key</td>
+                                            <td>@characteristic.value</td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    }
+                    <br />
+
+                    @if (article.extendedInfo.originals.Count() > 0)
+                    {
+                        <h4>Оригинальные номера:</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                <table class="table table-striped">
+                                    <tr>
+                                        <th>Производитель</th>
+                                        <th>Партномера</th>
+                                    </tr>
+                                    @foreach (var original in article.extendedInfo.originals)
+                                    {
+                                        <tr>
+                                            <td class="align-baseline">@original.tradeMarkName</td>
+
+
+                                            <td>
+                                                @foreach (var ac in original.articleCodes)
+                                                {
+
+                                            <tr>
+                                                        @ac
+                                            </tr>
+
+                                                }
+                                        </td>
+
+                                            @*<td>@string.Join(",", original.articleCodes)</td>*@
+                                        </tr>
+                                        <br />
+                                    }
+                                </table>
+                            </div>
+                        </div>
+                    }
+                    <br />
+                    
+                    @if (article.extendedInfo.applicability.Count() > 0)
+                    {
+                        <h4>Применимость:</h4>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Марка</th>
+                                    <th>Модель</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var applicability in article.extendedInfo.applicability)
+                                {
+                                    <tr>
+                                        <td class="align-baseline">@applicability.name</td>
+                                        @if (applicability.models.Count() > 0)
+                                        {
+
+
+                                            @foreach (var model in applicability.models)
+                                            {
+                                            <tr class="align-baseline">@model.name</tr>
+                                            <br />
+                                                @if (model.modifications.Count() > 0)
+                                                {
+                                                    @foreach (var m in model.modifications)
+                                                    {
+                                                    <tr class="text-end">@m.name C года месяца @m.beginDate по @m.endDate Объем:@m.vol</tr>
+                                                    }
+
+                                                }
+
+                                            }
+                                        }
+                                    </tr>
+
+
+                                }
+                            </tbody>
+                        </table>
+                    }
+                }
+            </div>
+        </div>
+
+
+    </div>
+}
+
+
+
+@code {
+    private ShatemFullArticle article;
+    private int originalCodes = 0;
+    [Parameter] public int articleId { get; set; } // Define articleId as a parameter
+    string? logoImage;
+    protected override async Task OnParametersSetAsync()
+    {
+        // Load full article information from ShatemDataService
+        try
+        {
+            article = await shatemDataService.FullArticleInfoAsync(articleId);
+
+
+            var originals = article.extendedInfo.originals;
+
+            originalCodes = originals.Count();
+
+
+            if (article.tradeMark.description is not null)
+            {
+
+
+                logoImage = await ExtractFirstImageSource(article.tradeMark.description);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка:{ex.Message}");
+        }
+
+
+    }
+
+
+    public async Task<string> ExtractFirstImageSource(string description)
+    {
+        if (!string.IsNullOrEmpty(description))
+        {
+            try
+            {
+                // Extract image source
+                int startIndex = description.IndexOf("src=\"") + 5;
+                if (startIndex >= 5)
+                {
+                    int endIndex = description.IndexOf("\"", startIndex);
+                    if (endIndex > startIndex)
+                    {
+                        string firstImageSource = description.Substring(startIndex, endIndex - startIndex);
+                        // Check if the extracted URL is a valid URL
+                        if (Uri.TryCreate(firstImageSource, UriKind.Absolute, out Uri resultUri) &&
+                            (resultUri.Scheme == Uri.UriSchemeHttp || resultUri.Scheme == Uri.UriSchemeHttps))
+                        {
+                            return firstImageSource;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"The extracted URL is not a valid URL: {firstImageSource}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to extract the image source: {ex.Message}");
+            }
+        }
+
+        return null;
+    }
+}

@@ -176,10 +176,11 @@ namespace DataAccessLibrary.DataService.Shatem
                             if (foundArticleWrapper != null && foundArticleWrapper.Article != null)
                             {
                                 foundArticle = foundArticleWrapper.Article;
-
-                                // Store the result in cache for future use
-                                await _cache.SetRecordAsync(cacheKey, foundArticle, TimeSpan.FromHours(24));
-
+                                if (_redisHelper.IsRedisServerAvailable())
+                                {
+                                    // Store the result in cache for future use
+                                    await _cache.SetRecordAsync(cacheKey, foundArticle, TimeSpan.FromHours(24));
+                                }
                                 return foundArticle;
                             }
                         }
@@ -253,7 +254,7 @@ namespace DataAccessLibrary.DataService.Shatem
                             // Store the result in cache if Redis server is available
                             if (_redisHelper.IsRedisServerAvailable())
                             {
-                                await _cache.SetRecordAsync(cacheKey, shatemFullArticle);
+                                await _cache.SetRecordAsync(cacheKey, shatemFullArticle, TimeSpan.FromDays(2));
                             }
                             return shatemFullArticle;
                         }
@@ -282,6 +283,8 @@ namespace DataAccessLibrary.DataService.Shatem
 
             ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
             string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
+
+
 
             List<ShatemAgreement> shatemAgreements = await _shatemAccess.GetAgreementsAsync(token);
             string agreementCode = shatemAgreements.FirstOrDefault()?.code; // Use null conditional operator to prevent NullReferenceException
@@ -331,7 +334,7 @@ namespace DataAccessLibrary.DataService.Shatem
                     // Store the result in cache if Redis server is available
                     if (_redisHelper.IsRedisServerAvailable())
                     {
-                        await _cache.SetRecordAsync(cacheKey, foundQty, TimeSpan.FromMinutes(15)); // Cache the results for 15 minutes
+                        await _cache.SetRecordAsync(cacheKey, foundQty, TimeSpan.FromMinutes(60)); // Cache the results for 60 minutes
                     }
 
                     return foundQty;
@@ -355,86 +358,109 @@ namespace DataAccessLibrary.DataService.Shatem
         }
 
 
-        public async Task<List<string>> SearchContentsAsync(string contentId, int heightSize = 400, int widthSize = 400)
+        public async Task<List<ContentImage>> SearchContentsAsync(string contentId, int heightSize = 400, int widthSize = 400)
         {
-
             string url = _shatemConfig.Uri;
             string apiKey = _shatemConfig.ApiKey;
 
-
             url = url + "/contents/search";
 
+
+            string cacheKey = $"ShatemImages_{contentId}"; // Generate a unique cache key based on articleId and includeAnalogs
+
+            // Check if Redis server is available
+            if (_redisHelper.IsRedisServerAvailable())
+            {
+                // Try to get the result from cache
+                List<ContentImage> cachedResults = await _cache.GetRecordAsync<List<ContentImage>>(cacheKey);
+
+                if (cachedResults != null)
+                {
+                    return cachedResults;
+                }
+            }
 
 
             ShatemAccessModel shatemAccessModel = await _shatemAccess.GetAccessTokenAsync();
             string token = shatemAccessModel.access_token; // Retrieve the access_token property from the ShatemAccessModel object
 
+
+
             using (var _httpClient = _httpClientFactory.CreateClient())
             {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                _httpClient.DefaultRequestHeaders.Accept.Clear();
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                ContentKey contentKey = new ContentKey
                 {
-                    _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-                    _httpClient.DefaultRequestHeaders.Accept.Clear();
-                    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
-                    _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    ContentId = contentId,
+                    HeightSize = heightSize,
+                    WidthSize = widthSize
+                };
 
-                    ContentKey contentKey = new ContentKey
+                SearchContentsRequest request = new SearchContentsRequest
+                {
+                    ContentKeys = new List<ContentKey> { contentKey }
+                };
+
+                string jsonRequest = JsonSerializer.Serialize(request);
+                StringContent content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                try
+                {
+                    HttpResponseMessage response = await _httpClient.PostAsync(url, content);
+
+                    if (response.IsSuccessStatusCode)
                     {
-                        ContentId = contentId,
-                        HeightSize = heightSize,
-                        WidthSize = widthSize
-                    };
+                        string jsonResponse = await response.Content.ReadAsStringAsync();
+                        List<SearchResult> searchResults = JsonSerializer.Deserialize<List<SearchResult>>(jsonResponse);
 
-                    SearchContentsRequest request = new SearchContentsRequest
-                    {
-                        ContentKeys = new List<ContentKey> { contentKey }
-                    };
-
-                    string jsonRequest = JsonSerializer.Serialize(request);
-                    StringContent content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-
-                    try
-                    {
-                        HttpResponseMessage response = await _httpClient.PostAsync(url, content);
-
-                        if (response.IsSuccessStatusCode)
+                        if (searchResults != null && searchResults.Count > 0)
                         {
-                            string jsonResponse = await response.Content.ReadAsStringAsync();
-                            List<SearchResult> searchResults = JsonSerializer.Deserialize<List<SearchResult>>(jsonResponse);
+                            List<ContentImage> contentImages = new List<ContentImage>();
 
-                            if (searchResults != null && searchResults.Count > 0)
+                            foreach (var result in searchResults)
                             {
-                                List<string> imageUrls = new List<string>();
-
-                                foreach (var result in searchResults)
+                                // Decode base64 value and extract image data
+                                if (!string.IsNullOrEmpty(result.Value) && result.Value.StartsWith("data:image/jpeg;base64,"))
                                 {
-                                    // Decode base64 value and extract image URL
-                                    if (!string.IsNullOrEmpty(result.Value) && result.Value.StartsWith("data:image/jpeg;base64,"))
+                                    string base64Value = result.Value.Substring("data:image/jpeg;base64,".Length);
+                                    byte[] imageBytes = Convert.FromBase64String(base64Value);
+                                    ContentImage contentImage = new ContentImage
                                     {
-                                        string base64Value = result.Value.Substring("data:image/jpeg;base64,".Length);
-                                        byte[] imageBytes = Convert.FromBase64String(base64Value);
-                                        string imageUrl = "data:image/jpeg;base64," + Encoding.UTF8.GetString(imageBytes);
-                                        imageUrls.Add(imageUrl);
-                                    }
+                                        Id = result.Id,
+                                        Value = imageBytes
+                                    };
+                                    contentImages.Add(contentImage);
                                 }
 
-                                return imageUrls;
-                            }
-                        }
 
-                        return null;
+
+                            }
+                            // Store the result in cache if Redis server is available
+                            if (_redisHelper.IsRedisServerAvailable())
+                            {
+                                await _cache.SetRecordAsync(cacheKey, contentImages, TimeSpan.FromDays(1));
+                            }
+
+                            return contentImages;
+                        }
                     }
-                    catch (HttpRequestException ex)
-                    {
-                        Console.WriteLine($"Произошла ошибка при запросе. {ex.Message}");
-                        // Handle network-related error
-                        return null;
-                    }
-                    catch (JsonException ex)
-                    {
-                        Console.WriteLine($"Произошла ошибка при десериализации JSON. {ex.Message}");
-                        // Handle JSON-related error
-                        return null;
-                    }
+
+                    return null;
+                }
+                catch (HttpRequestException ex)
+                {
+                    Console.WriteLine($"An error occurred while making the request. {ex.Message}");
+                    // Handle network-related error
+                    return null;
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"An error occurred while deserializing JSON. {ex.Message}");
+                    // Handle JSON-related error
+                    return null;
                 }
             }
         }

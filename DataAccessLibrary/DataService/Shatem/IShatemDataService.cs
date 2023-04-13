@@ -8,6 +8,6 @@ namespace DataAccessLibrary.DataService.Shatem
         Task<ShatemFullArticle> FullArticleInfoAsync(int articleId);
         Task<List<ShatemFoundArticle>> SearchArticlesAsync(string lineToSearch, string tradeMarkName = null);
         Task<List<ShatemArticlePrice>> SearchAvailableQuantityAsync(string articleId, bool includeAnalogs = false);
-        Task<List<string>> SearchContentsAsync(string contentId, int heightSize = 400, int widthSize = 400);
+        Task<List<ContentImage>> SearchContentsAsync(string contentId, int heightSize = 400, int widthSize = 400);
     }
 }
